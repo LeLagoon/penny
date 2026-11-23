@@ -6,3 +6,4 @@ __pycache__/
 # ML artifacts and local learning data
 ml/artifacts/
 ml/data/user_feedback.csv
+.claude/
