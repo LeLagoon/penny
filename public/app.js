@@ -11,6 +11,7 @@ const STATE = {
   goals: [],
   benchmarks: null,
   diagnostics: null,
+  insights: null,
   meta: null,
   colleges: [],
   cities: [],
@@ -68,6 +69,80 @@ const BASE_CAT_NAMES = {
 
 let CAT_COLORS = { ...BASE_CAT_COLORS };
 let CAT_NAMES = { ...BASE_CAT_NAMES };
+
+// fetch wrapper: turns HTTP errors (e.g. a 400 validation message from the server) into exceptions.
+async function apiFetch(url, options) {
+  const res = await fetch(url, options);
+  if (!res.ok) {
+    let message = `Request failed (${res.status})`;
+    try { message = (await res.json()).error || message; } catch {}
+    throw new Error(message);
+  }
+  return res;
+}
+
+// How sure the system is, shown honestly. Nothing here is invented: the number is the model's
+// own probability, and "Not sure" appears when the model says a human should check.
+function predictionBadge(p) {
+  const pct = typeof p.confidence === 'number' ? Math.round(p.confidence * 100) : null;
+  const engineName = p.engine === 'ml' || p.confidence_source === 'ml' ? 'AI model'
+    : (p.source && p.source.startsWith('user_rule')) ? 'a rule you taught'
+    : p.source === 'custom_category' ? 'your custom category keywords' : 'keyword rules';
+  if (p.confidence_source === 'user' || p.source === 'user_rule_exact') {
+    return { text: p.confidence_source === 'user' ? 'Your choice' : 'Your rule', cls: 'pill-emerald', title: 'Set by you' };
+  }
+  if (p.needs_review && pct === null) {
+    return { text: 'Check', cls: 'pill-orange', title: `The ${engineName} would pick a different category. Click Teach to correct it.` };
+  }
+  if (p.needs_review) {
+    return { text: `Not sure · ${pct}%`, cls: 'pill-orange', title: `Low confidence from the ${engineName}. Please check the category.` };
+  }
+  if (pct === null) return { text: '—', cls: 'pill-subtle', title: 'No confidence available' };
+  return { text: `${pct}%`, cls: pct >= 85 ? 'pill-emerald' : 'pill-blue', title: `Confidence from the ${engineName}` };
+}
+
+function setPredictionPill(el, prediction) {
+  if (!el) return;
+  const b = predictionBadge(prediction);
+  el.className = `pill ${b.cls}`;
+  el.textContent = b.text;
+  el.title = b.title;
+}
+
+// Escape user-controlled text before putting it into innerHTML (prevents script injection).
+function escapeHtml(value) {
+  return String(value === undefined || value === null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Every expense/goal remembers the currency it was entered in. Only entries in the active
+// currency are shown and summed; the rest are kept on disk and reappear when you switch back.
+// Ledger buttons carry only an expense id; the description and category are looked up here,
+// so user-entered text never has to be embedded in an inline onclick string.
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('#ledger-tbody [data-action]');
+  if (!btn) return;
+  const id = Number(btn.dataset.id);
+  if (btn.dataset.action === 'delete') {
+    deleteExpense(id);
+  } else if (btn.dataset.action === 'teach') {
+    const t = STATE.transactions.find(x => x.id === id);
+    if (t) openTeachModal(t.id);
+  }
+});
+
+function matchesActiveCurrency(entry) {
+  return !entry.currency || entry.currency === STATE.currencyCode;
+}
+
+function applyCurrencyFilter() {
+  if (STATE.allTransactions) STATE.transactions = STATE.allTransactions.filter(matchesActiveCurrency);
+  if (STATE.allGoals) STATE.goals = STATE.allGoals.filter(matchesActiveCurrency);
+}
 
 function formatCurrency(val, options = {}) {
   const num = parseFloat(val) || 0;
@@ -154,6 +229,7 @@ function setRegion(regionCode) {
   STATE.currencySymbol = reg.symbol || '$';
   STATE.currencyCode = reg.currency || 'USD';
 
+  applyCurrencyFilter();
   updateCurrencyLabels();
 
   const railSelect = document.getElementById('rail-region-select');
@@ -185,12 +261,12 @@ function updateCurrencyLabels() {
   const inlineAmt = document.getElementById('inline-amt');
   if (inlineAmt) {
     inlineAmt.placeholder = `${sym} Amount`;
-    inlineAmt.step = (STATE.currentRegion && STATE.currentRegion.stepAmt) || 1;
+    inlineAmt.step = 'any';
   }
 
   const qmAmt = document.getElementById('qm-amt');
   if (qmAmt) {
-    qmAmt.step = (STATE.currentRegion && STATE.currentRegion.stepAmt) || 1;
+    qmAmt.step = 'any';
   }
 
   const canvasBadge = document.getElementById('canvas-active-currency-badge');
@@ -205,46 +281,17 @@ async function handleRegionSwitch(regionCode) {
   setRegion(regionCode);
 
   try {
+    // Switching region only changes the profile's country (and so the currency shown).
+    // Nothing the user entered is replaced or converted.
     if (STATE.profile) {
       STATE.profile.country = regionCode;
-
-      const currentCollegeMatch = STATE.colleges.find(c => c.name === STATE.profile.college);
-      if (currentCollegeMatch && currentCollegeMatch.country && currentCollegeMatch.country !== regionCode) {
-        const campusInNewRegion = STATE.colleges.find(c => c.country === regionCode);
-        if (campusInNewRegion) {
-          STATE.profile.college = campusInNewRegion.name;
-          STATE.profile.campus_city = campusInNewRegion.city;
-        }
-      }
-
-      if (regionCode === 'IN' && STATE.profile.tuition_amount < 50000) {
-        STATE.profile.tuition_amount = reg.sampleTuition;
-        STATE.profile.monthly_income = reg.sampleIncome;
-        STATE.profile.financial_aid = reg.sampleAid;
-      } else if (regionCode !== 'IN' && STATE.profile.tuition_amount > 100000) {
-        STATE.profile.tuition_amount = reg.sampleTuition;
-        STATE.profile.monthly_income = reg.sampleIncome;
-        STATE.profile.financial_aid = reg.sampleAid;
-      }
-
-      await fetch('/api/profile', {
+      const res = await apiFetch('/api/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(STATE.profile)
       });
+      if (!res.ok) throw new Error((await res.json()).error || 'Could not save region');
     }
-
-    await fetch('/api/transactions/reset', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ country: regionCode })
-    });
-
-    await fetch('/api/goals/reset', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ country: regionCode })
-    });
 
     await loadProfile();
     await loadTransactions();
@@ -253,16 +300,61 @@ async function handleRegionSwitch(regionCode) {
     await loadDiagnostics();
 
     renderAll();
-    showToast(`Region modified to ${reg.name} (${reg.currency} ${reg.symbol})!`);
+
+    const hiddenTxns = (STATE.allTransactions || []).length - STATE.transactions.length;
+    const hiddenGoals = (STATE.allGoals || []).length - STATE.goals.length;
+    if (hiddenTxns > 0 || hiddenGoals > 0) {
+      showToast(`${hiddenTxns} expense(s) and ${hiddenGoals} goal(s) in other currencies are kept and hidden until you switch back.`);
+    }
+
+    // Amounts are not converted automatically, so ask the user to enter them in the new currency.
+    openRegionUpdatePrompt(reg);
   } catch (err) {
     console.error('Failed to switch region:', err);
+    showToast(err.message || 'Something went wrong.');
+  }
+}
+
+// After a region switch, reuse the profile dialog to collect college and amounts in the new currency.
+function openRegionUpdatePrompt(reg) {
+  openProfileModal(false);
+
+  const titleEl = document.getElementById('ob-modal-title');
+  const subEl = document.getElementById('ob-modal-sub');
+  const submitBtn = document.getElementById('ob-submit-btn');
+  if (titleEl) titleEl.textContent = `Update your details for ${reg.name}`;
+  if (subEl) {
+    subEl.textContent = `You switched to ${reg.currency} (${reg.symbol}). Amounts are not converted automatically, so enter your tuition, allowance and aid in ${reg.symbol}. We pre-filled typical values for ${reg.name}; adjust them to your own. Cancel to keep what you had.`;
+  }
+  if (submitBtn) submitBtn.textContent = 'Save Details';
+
+  // The old amounts are in the previous currency, so start from this region's typical values.
+  const tuitionInp = document.getElementById('ob-tuition');
+  const incomeInp = document.getElementById('ob-income');
+  const aidInp = document.getElementById('ob-aid');
+  if (tuitionInp) tuitionInp.value = reg.sampleTuition;
+  if (incomeInp) incomeInp.value = reg.sampleIncome;
+  if (aidInp) aidInp.value = reg.sampleAid;
+  setTuitionPeriod('annual');
+
+  // If the saved college is in another country, preselect the first one in this region.
+  const current = STATE.colleges.find(c => c.name === (STATE.profile && STATE.profile.college));
+  if (!current || current.country !== reg.code) {
+    const first = STATE.colleges.find(c => c.country === reg.code);
+    const collegeSel = document.getElementById('ob-college');
+    if (first && collegeSel) {
+      collegeSel.value = first.name;
+      handleCollegeChange(first.name);
+    }
   }
 }
 
 async function resetGoalsToRegion() {
   const code = STATE.currentRegion ? STATE.currentRegion.code : 'US';
+  const regionName = (STATE.currentRegion && STATE.currentRegion.name) || code;
+  if (!confirm(`Replace your ${regionName} savings goals with the sample defaults? Your current ${STATE.currencyCode} goals will be lost.`)) return;
   try {
-    await fetch('/api/goals/reset', {
+    await apiFetch('/api/goals/reset', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ country: code })
@@ -272,12 +364,13 @@ async function resetGoalsToRegion() {
     showToast(`Reset savings milestones to ${STATE.currentRegion.name} defaults!`);
   } catch (err) {
     console.error('Failed to reset goals:', err);
+    showToast(err.message || 'Something went wrong.');
   }
 }
 
 async function loadCategories() {
   try {
-    const res = await fetch('/api/categories');
+    const res = await apiFetch('/api/categories');
     const data = await res.json();
     STATE.categories = data;
 
@@ -290,6 +383,7 @@ async function loadCategories() {
         CAT_NAMES[c.id] = c.name;
       });
     }
+    refreshCategorySelects();
   } catch (err) {
     console.error('Failed to load categories:', err);
   }
@@ -297,7 +391,7 @@ async function loadCategories() {
 
 async function loadMetadata() {
   try {
-    const res = await fetch('/api/meta');
+    const res = await apiFetch('/api/meta');
     STATE.meta = await res.json();
     if (STATE.meta.colleges) STATE.colleges = STATE.meta.colleges;
     if (STATE.meta.cities) STATE.cities = STATE.meta.cities;
@@ -310,7 +404,7 @@ async function loadMetadata() {
 
 async function loadProfile() {
   try {
-    const res = await fetch('/api/profile');
+    const res = await apiFetch('/api/profile');
     const data = await res.json();
     if (data.exists && data.profile && data.profile.college) {
       STATE.profile = data.profile;
@@ -335,8 +429,10 @@ async function loadProfile() {
 
 async function loadTransactions() {
   try {
-    const res = await fetch('/api/transactions');
-    STATE.transactions = await res.json();
+    const res = await apiFetch('/api/transactions');
+    STATE.allTransactions = await res.json();
+    STATE.transactions = STATE.allTransactions.filter(matchesActiveCurrency);
+    await loadInsights();
   } catch (err) {
     console.error('Failed to load transactions:', err);
   }
@@ -344,16 +440,35 @@ async function loadTransactions() {
 
 async function loadGoals() {
   try {
-    const res = await fetch('/api/goals');
-    STATE.goals = await res.json();
+    const res = await apiFetch('/api/goals');
+    STATE.allGoals = await res.json();
+    STATE.goals = STATE.allGoals.filter(matchesActiveCurrency);
+    await loadInsights();
   } catch (err) {
     console.error('Failed to load goals:', err);
   }
 }
 
+// Personalised budget, forecast, unusual spending and recurring bills (from the ML service).
+async function loadInsights() {
+  try {
+    const res = await fetch('/api/insights');
+    STATE.insights = await res.json();
+  } catch (err) {
+    STATE.insights = { available: false, reason: 'Could not reach the server.' };
+  }
+}
+
+// The budget shown everywhere: learned from your own history when available, else the formula estimate.
+function effectiveBudget() {
+  const ins = STATE.insights;
+  if (ins && ins.available && ins.budget && ins.budget.recommended > 0) return ins.budget.recommended;
+  return STATE.predictedBudget;
+}
+
 async function loadPeerBenchmarks() {
   try {
-    const res = await fetch('/api/peer-benchmarks');
+    const res = await apiFetch('/api/peer-benchmarks');
     STATE.benchmarks = await res.json();
   } catch (err) {
     console.error('Failed to load peer benchmarks:', err);
@@ -362,7 +477,7 @@ async function loadPeerBenchmarks() {
 
 async function loadDiagnostics() {
   try {
-    const res = await fetch('/api/diagnostics');
+    const res = await apiFetch('/api/diagnostics');
     STATE.diagnostics = await res.json();
   } catch (err) {
     console.error('Failed to load diagnostics:', err);
@@ -440,7 +555,7 @@ function updateSidebarProfile() {
   if (netInflowEl) netInflowEl.textContent = `${formatCurrency(netInflow)}/mo`;
   
   if (cityEl) cityEl.textContent = p.campus_city || 'Campus City';
-  if (budgetEl) budgetEl.textContent = formatCurrency(parseFloat(STATE.predictedBudget || 0));
+  if (budgetEl) budgetEl.textContent = formatCurrency(parseFloat(effectiveBudget() || 0));
   
   if (budgetSubEl) {
     budgetSubEl.textContent = `Estimated for ${p.campus_city || 'City'} based on local costs.`;
@@ -452,7 +567,7 @@ function updateSidebarProfile() {
 }
 
 function renderOverview() {
-  const budget = STATE.predictedBudget;
+  const budget = effectiveBudget();
   const now = new Date();
   const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
@@ -535,6 +650,86 @@ function renderOverview() {
 
   drawSpendingTrendChart();
   drawDonutChart(categoryTotals, spentThisMonth);
+  renderBudgetNotes();
+  renderInsights();
+}
+
+function renderBudgetNotes() {
+  const sub = document.getElementById('kpi-budget-sub');
+  const pill = document.getElementById('kpi-budget-pill');
+  const ins = STATE.insights;
+  if (!sub || !pill) return;
+  if (ins && ins.available && ins.budget) {
+    const n = ins.budget.history_months;
+    if (n === 0) {
+      pill.textContent = 'Estimate';
+      sub.textContent = 'Cost-of-living estimate. It will adapt once you have a full month of expenses.';
+    } else {
+      pill.textContent = `Learned · ${n} mo`;
+      sub.textContent = `Blended from the local estimate (${formatCurrency(ins.budget.prior)}) and ${n} month${n === 1 ? '' : 's'} of your own spending.`;
+    }
+  } else {
+    pill.textContent = 'Estimate';
+    sub.textContent = 'Cost-of-living estimate based on your allowance and local costs.';
+  }
+}
+
+const RECURRING_STATUS = { paid: 'paid this month', upcoming: 'coming up', not_yet_seen: 'not seen yet this month' };
+
+function renderInsights() {
+  const fBody = document.getElementById('insights-forecast-body');
+  const rel = document.getElementById('insights-reliability');
+  const anomBox = document.getElementById('insights-anomalies');
+  const recBox = document.getElementById('insights-recurring');
+  if (!fBody) return;
+  const ins = STATE.insights;
+  if (!ins || !ins.available) {
+    if (rel) { rel.className = 'pill pill-subtle'; rel.textContent = 'Unavailable'; }
+    fBody.textContent = `Forecasts need the ML service. ${ins && ins.reason ? ins.reason : ''}`.trim();
+    if (anomBox) anomBox.innerHTML = '';
+    if (recBox) recBox.innerHTML = '';
+    return;
+  }
+  const f = ins.forecast;
+  const budget = effectiveBudget();
+  const over = f.probability_over_budget;
+  const overPct = over === null || over === undefined ? null : Math.round(over * 100);
+  const relText = { low: 'Early estimate', medium: 'Moderate confidence', high: 'High confidence' }[f.reliability] || f.reliability;
+  if (rel) { rel.className = `pill ${f.reliability === 'high' ? 'pill-emerald' : f.reliability === 'medium' ? 'pill-blue' : 'pill-orange'}`; rel.textContent = relText; }
+  fBody.innerHTML = `
+    <div style="display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;">
+      <span class="kpi-num" style="font-size:28px; color:var(--text-main);">${formatCurrency(f.projected_total)}</span>
+      <span style="font-size:12.5px;">expected by month end (likely ${formatCurrency(f.low_80)} – ${formatCurrency(f.high_80)})</span>
+    </div>
+    <div style="margin-top:8px; line-height:1.6;">
+      Spent so far <b>${formatCurrency(f.spent_so_far)}</b> (day ${f.day} of ${f.days_in_month}) ·
+      everyday pace <b>${formatCurrency(f.daily_rate_used)}/day</b>
+      ${f.expected_recurring_remaining > 0 ? ` · recurring bills still due <b>${formatCurrency(f.expected_recurring_remaining)}</b>` : ''}
+    </div>
+    ${overPct !== null ? `<div style="margin-top:8px;">Chance of finishing over your ${formatCurrency(budget)} budget:
+      <span class="pill ${overPct >= 60 ? 'pill-orange' : overPct >= 25 ? 'pill-blue' : 'pill-emerald'}">${overPct}%</span></div>` : ''}
+    <div style="margin-top:8px; font-size:11.5px;">Pace is based on ${escapeHtml(f.rate_source)}. ${escapeHtml(ins.data.note)}</div>`;
+
+  if (anomBox) {
+    anomBox.innerHTML = ins.anomalies.length
+      ? ins.anomalies.map(a => `<div style="padding:8px 10px; background:#FFF7ED; border:1px solid #FED7AA; border-radius:8px; margin-bottom:6px; font-size:12.5px;">
+          <b>${escapeHtml(a.description)}</b> · ${formatCurrency(a.amount)} <span style="color:#9A3412;">(${escapeHtml(a.reason)})</span></div>`).join('')
+      : '<div style="font-size:12.5px; color:var(--text-muted);">No unusually large expenses recently.</div>';
+  }
+  if (recBox) {
+    recBox.innerHTML = ins.recurring.length
+      ? '<div style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px;">Recurring bills detected</div>' +
+        ins.recurring.slice(0, 5).map(r => `<div style="display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding:4px 0;">
+          <span>${escapeHtml(r.merchant)} <span style="color:var(--text-muted);">· around the ${r.typical_day}${ordinalSuffix(r.typical_day)}</span></span>
+          <span><b>${formatCurrency(r.typical_amount)}</b> <span style="color:var(--text-muted);">${escapeHtml(RECURRING_STATUS[r.status] || r.status)}</span></span></div>`).join('')
+      : '<div style="font-size:12.5px; color:var(--text-muted);">No recurring bills detected yet. They appear after the same bill shows up in 2+ months.</div>';
+  }
+}
+
+function ordinalSuffix(n) {
+  const v = n % 100;
+  if (v >= 11 && v <= 13) return 'th';
+  return ({ 1: 'st', 2: 'nd', 3: 'rd' })[n % 10] || 'th';
 }
 
 function drawSpendingTrendChart() {
@@ -562,7 +757,7 @@ function drawSpendingTrendChart() {
     cumulative[d] = cumulative[d - 1] + dailySpend[d];
   }
 
-  const budget = Math.max(STATE.predictedBudget, 100);
+  const budget = Math.max(effectiveBudget(), 100);
   const maxVal = Math.max(budget * 1.15, cumulative[currentDay] * 1.2, 100);
 
   const width = svg.clientWidth || 540;
@@ -710,7 +905,7 @@ function drawDonutChart(totals, totalSpent) {
     segment.setAttribute('stroke-dashoffset', dashOffset);
     segment.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
     segment.style.transition = 'all 0.5s var(--apple-spring)';
-    segment.innerHTML = `<title>${name}: ${formatCurrency(amt)} (${Math.round(pct * 100)}%)</title>`;
+    segment.innerHTML = `<title>${escapeHtml(name)}: ${formatCurrency(amt)} (${Math.round(pct * 100)}%)</title>`;
     svg.appendChild(segment);
 
     accumulatedPct += pct;
@@ -723,8 +918,8 @@ function drawDonutChart(totals, totalSpent) {
       row.style.fontSize = '12px';
       row.innerHTML = `
         <div style="display:flex; align-items:center; gap:6px;">
-          <span class="cat-dot" style="background:${color};"></span>
-          <span style="font-weight:600; color:var(--text-main);">${name}</span>
+          <span class="cat-dot" style="background:${escapeHtml(color)};"></span>
+          <span style="font-weight:600; color:var(--text-main);">${escapeHtml(name)}</span>
         </div>
         <span style="font-weight:700; color:var(--text-muted);">
           ${formatCurrency(amt)} (${Math.round(pct * 100)}%)
@@ -767,34 +962,27 @@ function renderExpenses() {
     const tr = document.createElement('tr');
     const catName = CAT_NAMES[t.category] || t.category || 'Miscellaneous';
     const color = CAT_COLORS[t.category] || '#64748B';
-    let confPct;
-    if (typeof t.confidence === 'number' && t.confidence >= 0.80 && t.confidence <= 0.99) {
-      confPct = Math.round(t.confidence * 100);
-    } else {
-      const seed = Math.abs(((t.id || 1) * 23) + ((t.amount || 1) * 7));
-      confPct = 80 + (seed % 20);
-    }
-    const pillClass = confPct >= 92 ? 'pill-emerald' : 'pill-blue';
+    const badge = predictionBadge(t);
 
     tr.innerHTML = `
       <td style="padding-left:20px;">
-        <div style="font-weight:600; color:var(--text-main);">${t.description || 'Expense'}</div>
+        <div style="font-weight:600; color:var(--text-main);">${escapeHtml(t.description || 'Expense')}</div>
       </td>
       <td>
-        <span class="cat-badge" style="background:${color}18; color:${color};">
-          <span class="cat-dot" style="background:${color};"></span>
-          <span>${catName}</span>
+        <span class="cat-badge" style="background:${escapeHtml(color)}18; color:${escapeHtml(color)};">
+          <span class="cat-dot" style="background:${escapeHtml(color)};"></span>
+          <span>${escapeHtml(catName)}</span>
         </span>
       </td>
-      <td style="color:var(--text-muted); font-size:12.5px;">${t.date || '—'}</td>
+      <td style="color:var(--text-muted); font-size:12.5px;">${escapeHtml(t.date || '—')}</td>
       <td>
-        <span class="pill ${pillClass}">${confPct}% Match</span>
+        <span class="pill ${badge.cls}" title="${escapeHtml(badge.title)}">${escapeHtml(badge.text)}</span>
       </td>
       <td class="amt" style="color:var(--text-main);">${formatCurrency(t.amount || 0)}</td>
       <td style="text-align:center; padding-right:20px;">
         <div style="display:flex; justify-content:center; gap:6px;">
-          <button class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="promptTeachRule('${t.description}', '${t.category}')">Teach</button>
-          <button class="btn-secondary" style="padding:4px 8px; font-size:11px; color:var(--rose);" onclick="deleteExpense(${t.id})">&times;</button>
+          <button class="btn-secondary" style="padding:4px 8px; font-size:11px;" data-action="teach" data-id="${escapeHtml(t.id)}">Teach</button>
+          <button class="btn-secondary" style="padding:4px 8px; font-size:11px; color:var(--rose);" data-action="delete" data-id="${escapeHtml(t.id)}" aria-label="Delete expense">&times;</button>
         </div>
       </td>
     `;
@@ -809,46 +997,94 @@ function filterLedger(cat, btn) {
   renderExpenses();
 }
 
+
+// --- Category pickers for the add-expense forms --------------------------------------------
+// First option is always "Auto-detect" (the default). Then every category, then "Add new category".
+const CATEGORY_SELECTS = { 'inline-cat-select': 'inline-cat-conf', 'qm-cat-select': 'qm-cat-conf' };
+const autoDetected = {};
+
+function populateCategorySelect(selId, keepValue) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  const prev = keepValue === undefined ? sel.value : keepValue;
+  sel.innerHTML = '';
+  const auto = document.createElement('option');
+  auto.value = '';
+  const guess = autoDetected[selId];
+  auto.textContent = guess ? `Auto-detect: ${CAT_NAMES[guess] || guess}` : 'Auto-detect from description';
+  sel.appendChild(auto);
+  Object.keys(CAT_NAMES).forEach(id => {
+    const o = document.createElement('option');
+    o.value = id;
+    o.textContent = CAT_NAMES[id];
+    sel.appendChild(o);
+  });
+  const add = document.createElement('option');
+  add.value = '__new__';
+  add.textContent = '+ Add new category…';
+  sel.appendChild(add);
+  sel.value = [...sel.options].some(o => o.value === prev) ? prev : '';
+  syncCategoryPill(selId);
+}
+
+function refreshCategorySelects() {
+  Object.keys(CATEGORY_SELECTS).forEach(id => populateCategorySelect(id));
+}
+
+function syncCategoryPill(selId) {
+  const sel = document.getElementById(selId);
+  const pill = document.getElementById(CATEGORY_SELECTS[selId]);
+  if (!sel || !pill) return;
+  if (sel.value) { pill.className = 'pill pill-blue'; pill.textContent = 'Your choice'; }
+  else if (!autoDetected[selId]) { pill.className = 'pill pill-subtle'; pill.textContent = '—'; }
+}
+
+let categorySelectToRestore = null;
+function onCategorySelectChange(sel) {
+  if (sel.value === '__new__') {
+    categorySelectToRestore = sel.id;
+    sel.value = '';
+    openCategoryModal();
+    return;
+  }
+  syncCategoryPill(sel.id);
+}
+
+// Called by the predictors: remember the guess and show it as the "Auto-detect" option.
+function noteAutoDetected(selId, data) {
+  autoDetected[selId] = data.category;
+  populateCategorySelect(selId);
+  const sel = document.getElementById(selId);
+  if (!sel.value) setPredictionPill(document.getElementById(CATEGORY_SELECTS[selId]), data);
+}
+
 async function handleInlineSubmit(e) {
   e.preventDefault();
   const desc = document.getElementById('inline-desc').value.trim();
   const amt = parseFloat(document.getElementById('inline-amt').value);
   const date = document.getElementById('inline-date').value;
+  const chosen = document.getElementById('inline-cat-select').value;
 
   if (!desc || isNaN(amt) || amt <= 0) return;
 
-  let category = 'miscellaneous';
-  let confidence = 0.95;
   try {
-    const res = await fetch('/api/nlp/predict', {
+    const res = await apiFetch('/api/transactions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: desc })
-    });
-    const pred = await res.json();
-    if (pred && pred.category) {
-      category = pred.category;
-      confidence = pred.confidence;
-    }
-  } catch (err) {
-    console.error('NLP predict failed:', err);
-  }
-
-  try {
-    const res = await fetch('/api/transactions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ description: desc, amount: amt, date, category, confidence })
+      body: JSON.stringify({ description: desc, amount: amt, date, ...(chosen ? { category: chosen } : {}) })
     });
     await res.json();
 
     document.getElementById('inline-desc').value = '';
     document.getElementById('inline-amt').value = '';
+    delete autoDetected['inline-cat-select'];
+    populateCategorySelect('inline-cat-select', '');
     await loadTransactions();
     renderAll();
     showToast(`Recorded ${formatCurrency(amt)} for ${desc}`);
   } catch (err) {
     console.error('Failed to log transaction:', err);
+    showToast(err.message || 'Something went wrong.');
   }
 }
 
@@ -858,51 +1094,106 @@ function handleInlinePredict(text) {
   predictTimer = setTimeout(async () => {
     if (!text.trim()) return;
     try {
-      const res = await fetch('/api/nlp/predict', {
+      const res = await apiFetch('/api/nlp/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text })
       });
       const data = await res.json();
-      const catEl = document.getElementById('inline-cat-name');
-      const confEl = document.getElementById('inline-cat-conf');
-      if (catEl) catEl.textContent = CAT_NAMES[data.category] || data.category;
-      if (confEl) {
-        const pct = (typeof data.confidence === 'number' && data.confidence >= 0.80 && data.confidence <= 0.99)
-          ? Math.round(data.confidence * 100)
-          : (80 + Math.floor(Math.random() * 20));
-        confEl.textContent = `${pct}%`;
-      }
+      noteAutoDetected('inline-cat-select', data);
     } catch {}
   }, 140);
 }
 
 async function deleteExpense(id) {
   try {
-    await fetch(`/api/transactions/${id}`, { method: 'DELETE' });
+    await apiFetch(`/api/transactions/${id}`, { method: 'DELETE' });
     await loadTransactions();
     renderAll();
     showToast('Expense deleted.');
   } catch (err) {
     console.error('Failed to delete expense:', err);
+    showToast(err.message || 'Something went wrong.');
   }
 }
 
-async function promptTeachRule(phrase, currentCat) {
-  const newCat = prompt(`Teach Penny: What sector should "${phrase}" map to?`, currentCat);
-  if (!newCat || newCat.toLowerCase() === currentCat.toLowerCase()) return;
+// --- Teach / correct a category (dialog) -----------------------------------------------------
+let teachTargetId = null;
 
+function openTeachModal(id) {
+  const t = STATE.transactions.find(x => x.id === id);
+  if (!t) return;
+  teachTargetId = id;
+  document.getElementById('teach-desc').textContent = t.description || '';
+  document.getElementById('teach-current').textContent = CAT_NAMES[t.category] || t.category;
+  setPredictionPill(document.getElementById('teach-conf'), t);
+
+  const sel = document.getElementById('teach-cat');
+  sel.innerHTML = '';
+  Object.keys(CAT_NAMES).forEach(id2 => {
+    const opt = document.createElement('option');
+    opt.value = id2;
+    opt.textContent = CAT_NAMES[id2];
+    sel.appendChild(opt);
+  });
+  sel.value = t.category;
+  document.getElementById('teach-remember').checked = true;
+
+  const backdrop = document.getElementById('teach-modal-backdrop');
+  const dialog = document.getElementById('teach-modal');
+  backdrop.style.display = 'block';
+  dialog.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => {
+    backdrop.style.opacity = '1';
+    dialog.style.opacity = '1';
+    dialog.style.transform = 'translate(-50%, -50%) scale(1)';
+  }, 10);
+}
+
+function closeTeachModal() {
+  const backdrop = document.getElementById('teach-modal-backdrop');
+  const dialog = document.getElementById('teach-modal');
+  backdrop.style.opacity = '0';
+  dialog.style.opacity = '0';
+  dialog.style.transform = 'translate(-50%, -46%) scale(0.96)';
+  document.body.style.overflow = '';
+  setTimeout(() => { backdrop.style.display = 'none'; dialog.style.display = 'none'; }, 220);
+}
+
+async function handleTeachSubmit(e) {
+  e.preventDefault();
+  const t = STATE.transactions.find(x => x.id === teachTargetId);
+  if (!t) return closeTeachModal();
+  const category = document.getElementById('teach-cat').value;
+  const remember = document.getElementById('teach-remember').checked;
   try {
-    await fetch('/api/nlp/teach', {
-      method: 'POST',
+    // 1. Fix this expense now.
+    await apiFetch(`/api/transactions/${teachTargetId}`, {
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: phrase, category: newCat.toLowerCase().trim() })
+      body: JSON.stringify({ category })
     });
-    showToast(`Rule learned! "${phrase}" -> ${newCat}`);
+    // 2. Optionally teach the AI so similar descriptions are labelled correctly next time.
+    let learned = null;
+    if (remember) {
+      const res = await apiFetch('/api/nlp/teach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: t.description, category })
+      });
+      learned = await res.json();
+    }
+    closeTeachModal();
+    await loadTransactions();
     await loadDiagnostics();
-    renderStudio();
+    renderAll();
+    showToast(remember
+      ? `Updated, and the ${learned && learned.ml_updated ? 'AI model has learned' : 'rule was saved'}: "${t.description}" → ${CAT_NAMES[category] || category}`
+      : `Category changed to ${CAT_NAMES[category] || category}.`);
   } catch (err) {
-    console.error('Failed to teach rule:', err);
+    console.error('Failed to save correction:', err);
+    showToast(err.message || 'Could not save the correction.');
   }
 }
 
@@ -966,8 +1257,8 @@ function renderGoals() {
     card.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:flex-start;">
         <div>
-          <span class="pill pill-blue">${g.priority || 'Medium'} Priority</span>
-          <div style="font-size:16px; font-weight:800; color:var(--text-main); margin-top:4px;">${g.name}</div>
+          <span class="pill pill-blue">${escapeHtml(g.priority || 'Medium')} Priority</span>
+          <div style="font-size:16px; font-weight:800; color:var(--text-main); margin-top:4px;">${escapeHtml(g.name)}</div>
         </div>
         <button class="btn-secondary" style="padding:4px 8px; font-size:11px; color:var(--rose);" onclick="deleteGoal(${g.id})">&times;</button>
       </div>
@@ -996,7 +1287,7 @@ function renderGoals() {
       <div style="display:flex; gap:6px; margin-top:8px; align-items:center; padding-top:8px; border-top:1px solid #F1F5F9;">
         <div style="position:relative; flex:1;">
           <span style="position:absolute; left:8px; top:50%; transform:translateY(-50%); font-size:11px; font-weight:700; color:var(--text-muted);">${STATE.currencySymbol}</span>
-          <input type="number" id="custom-dep-${g.id}" class="form-input" style="padding:4px 8px 4px 20px; font-size:11.5px; height:28px;" placeholder="Custom amount" min="1" step="${reg.stepAmt || 1}" onkeydown="if(event.key==='Enter'){handleCustomDeposit(${g.id});}">
+          <input type="number" id="custom-dep-${g.id}" class="form-input" style="padding:4px 8px 4px 20px; font-size:11.5px; height:28px;" placeholder="Custom amount" min="0.01" step="any" onkeydown="if(event.key==='Enter'){handleCustomDeposit(${g.id});}">
         </div>
         <button class="btn-secondary" style="padding:4px 10px; font-size:11px; height:28px; font-weight:700;" onclick="handleCustomDeposit(${g.id})">Deposit</button>
       </div>
@@ -1021,7 +1312,7 @@ async function handleCustomDeposit(id) {
 
 async function depositGoal(id, amount) {
   try {
-    await fetch(`/api/goals/${id}/deposit`, {
+    await apiFetch(`/api/goals/${id}/deposit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount })
@@ -1031,17 +1322,19 @@ async function depositGoal(id, amount) {
     showToast(`Added ${formatCurrency(amount)} to milestone reserve!`);
   } catch (err) {
     console.error('Failed to deposit to goal:', err);
+    showToast(err.message || 'Something went wrong.');
   }
 }
 
 async function deleteGoal(id) {
   try {
-    await fetch(`/api/goals/${id}`, { method: 'DELETE' });
+    await apiFetch(`/api/goals/${id}`, { method: 'DELETE' });
     await loadGoals();
     renderGoals();
     showToast('Milestone target removed.');
   } catch (err) {
     console.error('Failed to delete goal:', err);
+    showToast(err.message || 'Something went wrong.');
   }
 }
 
@@ -1050,32 +1343,56 @@ function updateSimulation(pctVal) {
   const lbl = document.getElementById('sim-pct-lbl');
   if (lbl) lbl.textContent = `${STATE.simCutPct}% Spend Reduction`;
 
-  let discSpend = 0;
-  STATE.transactions.forEach(t => {
-    const cat = t.category || 'miscellaneous';
-    if (cat === 'food' || cat === 'entertainment' || cat === 'shopping') {
-      discSpend += parseFloat(t.amount || 0);
-    }
-  });
-
+  // Monthly spend on discretionary categories: your average over complete months when we have them,
+  // otherwise this month's pace. (Never all-time totals mistaken for a month.)
+  const ins = STATE.insights && STATE.insights.available ? STATE.insights : null;
+  let discSpend;
+  let basis;
+  if (ins) {
+    discSpend = ins.discretionary.avg_monthly;
+    basis = ins.discretionary.basis;
+  } else {
+    const now = new Date();
+    const key = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const mtd = STATE.transactions
+      .filter(t => t.date && t.date.startsWith(key) && ['food', 'entertainment', 'shopping'].includes(t.category))
+      .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+    discSpend = mtd / Math.max(now.getDate(), 1) * daysInMonth;
+    basis = "this month's pace";
+  }
   const monthlySavings = Math.round(discSpend * (STATE.simCutPct / 100));
   const annualSavings = monthlySavings * 12;
 
-  let daysFaster = 0;
-  if (STATE.goals.length > 0 && monthlySavings > 0) {
-    const g = STATE.goals[0];
-    const remaining = Math.max(parseFloat(g.target_amount) - parseFloat(g.saved_amount), 0);
-    const monthsAccelerated = remaining / Math.max(monthlySavings, 1);
-    daysFaster = Math.round(monthsAccelerated * 24);
+  // How long would those savings take to fully fund the most urgent unfinished goal?
+  const priorityRank = { High: 0, Medium: 1, Low: 2 };
+  const open = STATE.goals
+    .filter(g => parseFloat(g.saved_amount) < parseFloat(g.target_amount))
+    .sort((a, b) => (priorityRank[a.priority] ?? 1) - (priorityRank[b.priority] ?? 1) || String(a.deadline).localeCompare(String(b.deadline)));
+  const goal = open[0];
+  let goalText = '—';
+  let goalLabel = 'Fund Top Goal In';
+  if (goal && monthlySavings > 0) {
+    const remaining = parseFloat(goal.target_amount) - parseFloat(goal.saved_amount);
+    const months = remaining / monthlySavings;
+    goalText = months < 1 ? 'under a month' : `${months.toFixed(1)} months`;
+    goalLabel = `Fund "${goal.name}" In`;
+  } else if (!goal) {
+    goalText = 'No open goals';
   }
 
   const outSaved = document.getElementById('sim-monthly-saved');
   const outDays = document.getElementById('sim-days-faster');
+  const outLabel = document.getElementById('sim-goal-label');
   const outAnnual = document.getElementById('sim-annual-reserve');
-
+  const outBasis = document.getElementById('sim-basis');
   if (outSaved) outSaved.textContent = `${formatCurrency(monthlySavings)}/mo`;
-  if (outDays) outDays.textContent = `${daysFaster} days earlier`;
+  if (outDays) outDays.textContent = goalText;
+  if (outLabel) outLabel.textContent = goalLabel;
   if (outAnnual) outAnnual.textContent = `+${formatCurrency(annualSavings)} / year`;
+  if (outBasis) {
+    outBasis.textContent = `Based on about ${formatCurrency(discSpend)}/month spent on food, entertainment and shopping (${basis}), if all savings went to that goal.`;
+  }
 }
 
 function renderAnalytics() {
@@ -1090,6 +1407,12 @@ function renderAnalytics() {
   const grid = document.getElementById('peer-benchmark-cards');
   const insightEl = document.getElementById('peer-location-insight');
 
+  const peerNote = document.getElementById('peer-illustrative-note');
+  if (peerNote && b.illustrative) {
+    const q = STATE.insights && STATE.insights.available ? STATE.insights.peer_data_quality : null;
+    peerNote.innerHTML = `<b>Illustrative only.</b> These averages come from a bundled sample dataset of ${b.cohort_size} students (converted by approximate purchasing-power parity), not from real students at your college.` +
+      (q && q.verdict ? ` Data check: ${escapeHtml(q.verdict)}` : '');
+  }
   if (locPill) locPill.textContent = `${b.campus_city} (${b.coli_factor}x Cost Index)`;
   if (scopeEl) scopeEl.textContent = `${b.scope} at ${b.college}`;
   if (sampleEl) sampleEl.textContent = `Compared with ${b.cohort_size} students in similar degree programs.`;
@@ -1114,8 +1437,8 @@ function renderAnalytics() {
       card.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
           <div style="display:flex; align-items:center; gap:6px;">
-            <span class="cat-dot" style="background:${color};"></span>
-            <span style="font-weight:700; font-size:13.5px;">${catName}</span>
+            <span class="cat-dot" style="background:${escapeHtml(color)};"></span>
+            <span style="font-weight:700; font-size:13.5px;">${escapeHtml(catName)}</span>
           </div>
           <span class="pill pill-blue">${item.location_multiplier}x Local Index</span>
         </div>
@@ -1227,7 +1550,7 @@ function drawPeerBarChart() {
     userBar.setAttribute('rx', '4');
     userBar.setAttribute('fill', '#0284C7');
     userBar.style.transition = 'all 0.3s var(--apple-spring)';
-    userBar.innerHTML = `<title>${catName}\nYour Spending: ${formatCurrency(userVal)}\nStudent Average: ${formatCurrency(peerVal)}</title>`;
+    userBar.innerHTML = `<title>${escapeHtml(catName)}\nYour Spending: ${formatCurrency(userVal)}\nStudent Average: ${formatCurrency(peerVal)}</title>`;
     svg.appendChild(userBar);
 
     const peerBar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -1238,7 +1561,7 @@ function drawPeerBarChart() {
     peerBar.setAttribute('rx', '4');
     peerBar.setAttribute('fill', '#64748B');
     peerBar.style.transition = 'all 0.3s var(--apple-spring)';
-    peerBar.innerHTML = `<title>${catName}\nYour Spending: ${formatCurrency(userVal)}\nStudent Average: ${formatCurrency(peerVal)}</title>`;
+    peerBar.innerHTML = `<title>${escapeHtml(catName)}\nYour Spending: ${formatCurrency(userVal)}\nStudent Average: ${formatCurrency(peerVal)}</title>`;
     svg.appendChild(peerBar);
 
     if (peerH > 22) {
@@ -1279,50 +1602,164 @@ function drawPeerBarChart() {
   });
 }
 
-function renderStudio() {
-  if (!STATE.diagnostics) return;
-  const d = STATE.diagnostics;
+function pct(x, digits = 1) {
+  return x === null || x === undefined ? '—' : `${(x * 100).toFixed(digits)}%`;
+}
 
-  const rulesCountEl = document.getElementById('ml-rules-count');
-  if (rulesCountEl) {
-    rulesCountEl.textContent = `${d.nlp_model.active_rules_count} Rules`;
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+function renderStudio() {
+  const d = STATE.diagnostics;
+  const banner = document.getElementById('studio-banner');
+  if (!d || !banner) return;
+  const ml = d.ml || {};
+  const m = ml.metrics;
+  const retrainBtn = document.getElementById('studio-retrain-btn');
+  if (retrainBtn) retrainBtn.disabled = ml.status !== 'ready';
+
+  if (ml.status === 'ready' && m) {
+    banner.style.cssText += ';background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;';
+    banner.innerHTML = `<b>Machine-learning model is running.</b> Last trained ${escapeHtml(new Date(m.trained_at).toLocaleString())}. ` +
+      `Everything below was measured on ${m.dataset.holdout_test_examples} held-out example phrases the model never saw while training.`;
+  } else {
+    banner.style.cssText += ';background:#FFF7ED;border:1px solid #FED7AA;color:#9A3412;';
+    const why = ml.status === 'starting' ? 'The ML service is still starting up (the first start trains the model and takes a few seconds). Refresh shortly.'
+      : ml.status === 'off' ? 'The ML service is switched off (PENNY_ML=off), so Penny is using its keyword rules.'
+      : `The ML service is not running (${escapeHtml(ml.error || 'unknown reason')}). Penny is using its keyword rules instead. Install the Python packages with <code>pip install -r requirements.txt</code> and restart.`;
+    banner.innerHTML = `<b>No machine-learning model active.</b> ${why}`;
   }
 
-  const diagMae = document.getElementById('diag-mae');
-  if (diagMae && d.budget_model && d.budget_model.mean_absolute_error) {
-    diagMae.textContent = formatCurrency(d.budget_model.mean_absolute_error);
+  const rules = d.rules || {};
+  if (!m) {
+    setText('ml-algo-line', `Keyword rules only: ${rules.lexicon_keywords || 0} built-in keywords, ${rules.taught_rules || 0} rules you taught.`);
+    ['ml-acc', 'ml-rules-acc', 'ml-f1', 'ml-ece'].forEach(id => setText(id, '—'));
+    setText('ml-acc-sub', '');
+    setText('ml-vocab-note', '');
+    const tb = document.getElementById('studio-matrix-tbody');
+    if (tb) tb.innerHTML = '<tr><td colspan="6" style="padding:16px 20px; color:var(--text-muted);">Per-category results appear once the ML model is running.</td></tr>';
+    ['studio-thresholds', 'studio-confusions'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = ''; });
+    renderBudgetDiagnostics();
+    renderHonesty(null);
+    return;
+  }
+
+  setText('ml-algo-line', `${m.features}. Trained on ${m.dataset.base_training_examples} labelled phrases + ${m.dataset.lexicon_weak_examples} keyword examples + ${m.dataset.user_feedback_examples} of your corrections.`);
+  setText('ml-acc', pct(m.holdout.accuracy));
+  setText('ml-acc-sub', `${m.dataset.holdout_test_examples} unseen test phrases`);
+  setText('ml-rules-acc', pct(m.holdout_rule_baseline.accuracy));
+  setText('ml-f1', m.holdout.macro_f1.toFixed(3));
+  setText('ml-ece', pct(m.calibration.expected_calibration_error));
+
+  const v = m.holdout_by_vocabulary;
+  const vocabEl = document.getElementById('ml-vocab-note');
+  if (vocabEl && v) {
+    vocabEl.innerHTML = `<b>Where it struggles:</b> accuracy is ${pct(v.some_words_seen.accuracy, 0)} when the description shares at least one word with its training data, but only ` +
+      `${pct(v.all_words_unseen.accuracy, 0)} (${v.all_words_unseen.n} phrases) when every word is new to it. That is why Penny flags such expenses as <i>Not sure</i> instead of guessing, and learns from your corrections.`;
   }
 
   const tbody = document.getElementById('studio-matrix-tbody');
   if (tbody) {
-    tbody.innerHTML = '';
-    const sectors = [
-      { name: 'Food & Dining', prec: '99.2%', rec: '99.5%', f1: '0.993', src: 'Lexicon + Memory', status: 'Optimal' },
-      { name: 'Transit & Travel', prec: '99.0%', rec: '99.1%', f1: '0.990', src: 'Lexicon + Rules', status: 'Optimal' },
-      { name: 'Education & Books', prec: '99.4%', rec: '99.2%', f1: '0.993', src: 'Lexicon + Memory', status: 'Optimal' },
-      { name: 'Technology & Hardware', prec: '98.8%', rec: '98.9%', f1: '0.988', src: 'Lexicon + Subset', status: 'Optimal' },
-      { name: 'Dorm & Utilities', prec: '99.1%', rec: '99.0%', f1: '0.990', src: 'Lexicon', status: 'Optimal' },
-      { name: 'Entertainment & Leisure', prec: '99.5%', rec: '99.2%', f1: '0.993', src: 'Lexicon + Memory', status: 'Optimal' },
-      { name: 'Healthcare & Wellness', prec: '99.6%', rec: '99.4%', f1: '0.995', src: 'Lexicon', status: 'Optimal' },
-      { name: 'Apparel & Shopping', prec: '98.9%', rec: '99.1%', f1: '0.990', src: 'Lexicon', status: 'Optimal' },
-      { name: 'Fitness & Gym (Custom)', prec: '99.0%', rec: '99.0%', f1: '0.990', src: 'Custom Category', status: 'Active' },
-      { name: 'Gaming & Digital (Custom)', prec: '99.0%', rec: '99.0%', f1: '0.990', src: 'Custom Category', status: 'Active' }
-    ];
+    const rows = Object.entries(m.holdout.per_class).sort((a, b) => a[1].f1 - b[1].f1);
+    tbody.innerHTML = rows.map(([cat, r]) => {
+      const base = m.holdout_rule_baseline.per_class[cat];
+      const gain = base ? r.f1 - base.f1 : 0;
+      return `<tr>
+        <td style="padding-left:20px; font-weight:600;">${escapeHtml(CAT_NAMES[cat] || cat)}</td>
+        <td>${pct(r.precision, 0)}</td><td>${pct(r.recall, 0)}</td>
+        <td style="font-weight:700; color:${r.f1 >= 0.85 ? 'var(--emerald)' : r.f1 >= 0.75 ? 'var(--text-main)' : '#C2410C'};">${r.f1.toFixed(2)}</td>
+        <td style="color:var(--text-muted);">${base ? base.f1.toFixed(2) : '—'} ${gain > 0.02 ? '<span style="color:var(--emerald); font-size:11px;">(+' + gain.toFixed(2) + ')</span>' : ''}</td>
+        <td style="padding-right:20px; text-align:right; color:var(--text-muted);">${r.support}</td></tr>`;
+    }).join('');
+  }
 
-    sectors.forEach(s => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td style="padding-left:20px; font-weight:600;">${s.name}</td>
-        <td style="color:var(--emerald); font-weight:700;">${s.prec}</td>
-        <td>${s.rec}</td>
-        <td>${s.f1}</td>
-        <td style="color:var(--text-muted); font-size:12px;">${s.src}</td>
-        <td style="padding-right:20px; text-align:right;">
-          <span class="pill pill-emerald">${s.status}</span>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
+  const thr = document.getElementById('studio-thresholds');
+  if (thr) {
+    thr.innerHTML = `<table class="data-table" style="width:100%; font-size:12.5px;"><thead><tr><th>Confidence at least</th><th>Expenses auto-labelled</th><th>Of those, correct</th></tr></thead><tbody>` +
+      m.confidence_thresholds.filter(t => [0, 0.5, 0.7, 0.9].includes(t.threshold)).map(t => {
+        const mark = Math.abs(t.threshold - m.review_threshold) < 0.001 ? ' style="background:#EFF6FF; font-weight:700;"' : '';
+        return `<tr${mark}><td>${pct(t.threshold, 0)}</td><td>${pct(t.coverage, 0)}</td><td>${pct(t.accuracy_when_accepted, 1)}</td></tr>`;
+      }).join('') + `</tbody></table>
+      <div style="font-size:11.5px; color:var(--text-muted); margin-top:6px;">Highlighted: the ${pct(m.review_threshold, 0)} cut-off below which Penny asks you to double-check.</div>`;
+  }
+
+  const conf = document.getElementById('studio-confusions');
+  if (conf) {
+    const labels = m.confusion_matrix.labels;
+    const pairs = [];
+    m.confusion_matrix.matrix.forEach((row, i) => row.forEach((n, j) => { if (i !== j && n > 0) pairs.push({ n, t: labels[i], p: labels[j] }); }));
+    pairs.sort((a, b) => b.n - a.n);
+    const nm = k => escapeHtml(CAT_NAMES[k] || k);
+    conf.innerHTML = (pairs.length ? '<div style="font-size:12.5px; margin-bottom:8px;"><b>Most common mix-ups</b></div>' +
+        pairs.slice(0, 5).map(x => `<div style="font-size:12.5px; padding:2px 0;">${nm(x.t)} mistaken for ${nm(x.p)} <span style="color:var(--text-muted);">× ${x.n}</span></div>`).join('') : '') +
+      (m.top_errors && m.top_errors.length ? '<div style="font-size:12.5px; margin:12px 0 6px;"><b>Confident mistakes</b></div>' +
+        m.top_errors.slice(0, 4).map(e => `<div style="font-size:12.5px; padding:2px 0;">"${escapeHtml(e.text)}" is really ${nm(e.true)}, predicted ${nm(e.predicted)} (${pct(e.confidence, 0)})</div>`).join('') : '');
+  }
+
+  renderBudgetDiagnostics();
+  renderHonesty(m);
+  const scratch = document.getElementById('scratch-input');
+  if (scratch && ml.status === 'ready') handleScratchPredict(scratch.value);
+}
+
+function renderBudgetDiagnostics() {
+  const ins = STATE.insights;
+  const line = document.getElementById('budget-method-line');
+  const val = document.getElementById('bud-validation');
+  if (!ins || !ins.available) {
+    if (line) line.textContent = 'Budget learning needs the ML service. Showing the cost-of-living estimate only.';
+    setText('bud-prior', formatCurrency(STATE.predictedBudget || 0));
+    ['bud-hist', 'bud-weight'].forEach(id => setText(id, '—'));
+    setText('bud-rec', formatCurrency(STATE.predictedBudget || 0));
+    setText('bud-hist-sub', ''); setText('bud-range', '');
+    if (val) val.textContent = '';
+    return;
+  }
+  const b = ins.budget;
+  if (line) line.textContent = b.method;
+  setText('bud-prior', formatCurrency(b.prior));
+  setText('bud-hist', b.history_centre === null || b.history_centre === undefined ? '—' : formatCurrency(b.history_centre));
+  setText('bud-hist-sub', `${b.history_months} complete month${b.history_months === 1 ? '' : 's'} of data`);
+  setText('bud-rec', formatCurrency(b.recommended));
+  setText('bud-range', b.interval_80 ? `likely ${formatCurrency(b.interval_80[0])} – ${formatCurrency(b.interval_80[1])}` : '');
+  setText('bud-weight', pct(b.weight_on_history, 0));
+  if (val) {
+    const t = b.validation;
+    val.textContent = t && t.mae_model !== null && t.mae_model !== undefined
+      ? `Backtest on your own history: average miss of ${formatCurrency(t.mae_model)} per month, versus ${formatCurrency(t.mae_prior_only)} for the estimate alone and ${formatCurrency(t.mae_last_month)} for "same as last month". ${t.beats_prior_only ? 'The learned budget is doing better.' : 'The learned budget is not clearly better yet.'}`
+      : 'Not enough complete months to test the budget against your history yet (needs at least 4). Until then the estimate carries most of the weight, and we do not claim an accuracy figure.';
+  }
+}
+
+function renderHonesty(m) {
+  const el = document.getElementById('studio-honesty');
+  if (!el) return;
+  const q = STATE.insights && STATE.insights.available ? STATE.insights.peer_data_quality : null;
+  const items = [
+    'The categoriser was trained on phrases written by the developer, not on real students\' spending. Accuracy on your own expenses may differ, and gets better as you correct it.',
+    m ? `Confidence numbers are calibrated: when the model says 90%, it was right ${pct(m.calibration.reliability.slice(-1)[0].accuracy, 0)} of the time on test data (average error ${pct(m.calibration.expected_calibration_error)}).` : null,
+    'The budget starts from a cost-of-living estimate; it only trusts your history in proportion to how many complete months you have.',
+    q ? `Peer comparison: ${escapeHtml(q.verdict)}` : 'Peer comparison uses an illustrative sample dataset, not real students at your college.'
+  ].filter(Boolean);
+  el.innerHTML = '<ul style="margin:0; padding-left:18px;">' + items.map(i => `<li style="margin-bottom:4px;">${i}</li>`).join('') + '</ul>';
+}
+
+async function retrainModels() {
+  const btn = document.getElementById('studio-retrain-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Training…'; }
+  try {
+    const res = await apiFetch('/api/ml/retrain', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Retrain failed');
+    await loadDiagnostics();
+    await loadInsights();
+    renderStudio();
+    showToast('Model re-trained and re-evaluated.');
+  } catch (err) {
+    showToast(err.message || 'Retrain failed');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Re-train & re-evaluate'; }
   }
 }
 
@@ -1332,7 +1769,7 @@ function handleScratchPredict(val) {
   scratchTimer = setTimeout(async () => {
     if (!val.trim()) return;
     try {
-      const res = await fetch('/api/nlp/predict', {
+      const res = await apiFetch('/api/nlp/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: val })
@@ -1341,12 +1778,7 @@ function handleScratchPredict(val) {
       const catEl = document.getElementById('scratch-cat-lbl');
       const confEl = document.getElementById('scratch-conf-lbl');
       if (catEl) catEl.textContent = CAT_NAMES[data.category] || data.category;
-      if (confEl) {
-        const pct = (typeof data.confidence === 'number' && data.confidence >= 0.80 && data.confidence <= 0.99)
-          ? Math.round(data.confidence * 100)
-          : (80 + Math.floor(Math.random() * 20));
-        confEl.textContent = `${pct}% Match`;
-      }
+      setPredictionPill(confEl, data);
     } catch (err) {
       console.error('Scratchpad error:', err);
     }
@@ -1398,6 +1830,7 @@ function openProfileModal(isForced = false) {
     document.getElementById('ob-payment').value = STATE.profile.preferred_payment_method || 'Mobile Payment App';
 
     setTuitionPeriod(STATE.profile.tuition_period || 'annual');
+    syncCityLock(document.getElementById('ob-college').value);
   } else {
     const regCode = STATE.currentRegion ? STATE.currentRegion.code : 'US';
     const obRegion = document.getElementById('ob-region');
@@ -1411,6 +1844,7 @@ function openProfileModal(isForced = false) {
     document.getElementById('ob-gender').selectedIndex = 0;
     document.getElementById('ob-payment').selectedIndex = 0;
     setTuitionPeriod('annual');
+    syncCityLock('');
   }
 
   backdrop.style.display = 'block';
@@ -1479,6 +1913,7 @@ function filterCollegeDropdownByRegion(regionCode) {
   if (currentVal && filtered.some(c => c.name === currentVal)) {
     obCollege.value = currentVal;
   }
+  syncCityLock(obCollege.value);
 }
 
 function handleModalRegionChange(regionCode) {
@@ -1504,20 +1939,32 @@ function handleModalRegionChange(regionCode) {
   }
 }
 
+// A known college fixes the campus location: show its city and lock the city dropdown.
+// "Other / Independent Institution" (or no college yet) leaves the city free to choose.
+function syncCityLock(collegeName) {
+  const citySelect = document.getElementById('ob-city');
+  if (!citySelect) return;
+  const match = STATE.colleges.find(c => c.name === collegeName);
+  const locked = !!match && !match.name.startsWith('Other');
+  if (locked) citySelect.value = match.city;
+  citySelect.disabled = locked;
+  citySelect.title = locked ? 'Campus location is set by your college' : '';
+  const hint = document.getElementById('ob-city-hint');
+  if (hint) hint.style.display = locked ? 'block' : 'none';
+}
+
 function handleCollegeChange(val) {
   const customRow = document.getElementById('custom-college-row');
   if (val === 'Other / Independent Institution') {
     if (customRow) customRow.style.display = 'block';
+    syncCityLock(val);
     return;
   }
   if (customRow) customRow.style.display = 'none';
 
   const match = STATE.colleges.find(c => c.name === val);
+  syncCityLock(val);
   if (match) {
-    const citySelect = document.getElementById('ob-city');
-    if (citySelect) {
-      citySelect.value = match.city;
-    }
     if (match.country && STATE.regions[match.country]) {
       const obRegion = document.getElementById('ob-region');
       if (obRegion && obRegion.value !== match.country) {
@@ -1564,7 +2011,7 @@ async function handleProfileSubmit(e) {
   };
 
   try {
-    const res = await fetch('/api/profile', {
+    const res = await apiFetch('/api/profile', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -1581,12 +2028,14 @@ async function handleProfileSubmit(e) {
     setRegion(country);
     closeProfileModal();
     await loadPeerBenchmarks();
+    await loadInsights();
     renderAll();
     switchView('overview');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     showToast(`Profile saved for ${college} (${city})!`);
   } catch (err) {
     console.error('Failed to save profile:', err);
+    showToast(err.message || 'Something went wrong.');
   }
 }
 
@@ -1623,17 +2072,22 @@ async function handleNewCategorySubmit(e) {
   if (!name) return;
 
   try {
-    const res = await fetch('/api/categories', {
+    const res = await apiFetch('/api/categories', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, color, keywords })
     });
+    const before = new Set(Object.keys(CAT_NAMES));
     await loadCategories();
+    const created = Object.keys(CAT_NAMES).find(k => !before.has(k));
+    if (categorySelectToRestore && created) populateCategorySelect(categorySelectToRestore, created);
+    categorySelectToRestore = null;
     closeCategoryModal();
     renderAll();
     showToast(`New category "${name}" registered successfully!`);
   } catch (err) {
     console.error('Failed to create category:', err);
+    showToast(err.message || 'Something went wrong.');
   }
 }
 
@@ -1670,20 +2124,13 @@ function handleModalPredict(val) {
   modalPredictTimer = setTimeout(async () => {
     if (!val.trim()) return;
     try {
-      const res = await fetch('/api/nlp/predict', {
+      const res = await apiFetch('/api/nlp/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: val })
       });
       const data = await res.json();
-      document.getElementById('qm-cat-name').textContent = CAT_NAMES[data.category] || data.category;
-      const confEl = document.getElementById('qm-cat-conf');
-      if (confEl) {
-        const pct = (typeof data.confidence === 'number' && data.confidence >= 0.80 && data.confidence <= 0.99)
-          ? Math.round(data.confidence * 100)
-          : (80 + Math.floor(Math.random() * 20));
-        confEl.textContent = `${pct}% Match`;
-      }
+      noteAutoDetected('qm-cat-select', data);
     } catch {}
   }, 140);
 }
@@ -1693,38 +2140,25 @@ async function handleQuickModalSubmit(e) {
   const desc = document.getElementById('qm-desc').value.trim();
   const amt = parseFloat(document.getElementById('qm-amt').value);
   const date = document.getElementById('qm-date').value;
+  const chosen = document.getElementById('qm-cat-select').value;
 
   if (!desc || isNaN(amt) || amt <= 0) return;
 
-  let category = 'miscellaneous';
-  let confidence = 0.95;
   try {
-    const res = await fetch('/api/nlp/predict', {
+    await apiFetch('/api/transactions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: desc })
+      body: JSON.stringify({ description: desc, amount: amt, date, ...(chosen ? { category: chosen } : {}) })
     });
-    const pred = await res.json();
-    if (pred && pred.category) {
-      category = pred.category;
-      confidence = pred.confidence;
-    }
-  } catch (err) {
-    console.error('NLP predict failed:', err);
-  }
-
-  try {
-    await fetch('/api/transactions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ description: desc, amount: amt, date, category, confidence })
-    });
+    delete autoDetected['qm-cat-select'];
+    populateCategorySelect('qm-cat-select', '');
     await loadTransactions();
     closeQuickModal();
     renderAll();
     showToast(`Logged ${formatCurrency(amt)} for ${desc}`);
   } catch (err) {
     console.error('Quick log failed:', err);
+    showToast(err.message || 'Something went wrong.');
   }
 }
 
@@ -1766,7 +2200,7 @@ async function handleNewGoalSubmit(e) {
   if (!name) return;
 
   try {
-    await fetch('/api/goals', {
+    await apiFetch('/api/goals', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, target_amount: target, saved_amount: saved, deadline, priority })
@@ -1777,6 +2211,7 @@ async function handleNewGoalSubmit(e) {
     showToast(`Registered target "${name}"!`);
   } catch (err) {
     console.error('New goal failed:', err);
+    showToast(err.message || 'Something went wrong.');
   }
 }
 
@@ -1847,9 +2282,10 @@ function showToast(msg) {
     t.style.opacity = '1';
     t.style.transform = 'translateX(-50%) translateY(0) scale(1)';
   }, 10);
-  setTimeout(() => {
+  clearTimeout(showToast.hideTimer);
+  showToast.hideTimer = setTimeout(() => {
     t.style.opacity = '0';
     t.style.transform = 'translateX(-50%) translateY(20px) scale(0.95)';
     setTimeout(() => { t.style.display = 'none'; }, 280);
-  }, 2600);
+  }, Math.max(2600, String(msg).length * 45));
 }

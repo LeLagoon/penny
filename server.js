@@ -2,6 +2,9 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { STUDENT_LEXICON } from './lib/lexicon.js';
+import { predictByRules, normalizeText } from './lib/rules.js';
+import { createMlClient } from './lib/ml-client.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,6 +22,10 @@ const FEEDBACK_CSV = path.join(BASE_DIR, 'transaction_feedback.csv');
 const STUDENT_CSV = path.join(BASE_DIR, 'student.csv');
 const TRANSACTIONS_CSV = path.join(BASE_DIR, 'transactions.csv');
 
+// pppFromUSD: local currency units that buy what 1 USD buys in the US (purchasing-power parity).
+// These are ROUNDED APPROXIMATIONS of World Bank ICP figures. Please verify/update them before relying on them.
+// They are used instead of market exchange rates because converting US student spending at market rates
+// grossly overstates local prices (e.g. 90x for India).
 const REGIONS = {
   US: {
     code: 'US',
@@ -28,6 +35,7 @@ const REGIONS = {
     flag: '🇺🇸',
     locale: 'en-US',
     exchangeFromUSD: 1.0,
+    pppFromUSD: 1.0,
     baseSubsistence: 1350,
     techSurcharge: 150,
     businessSurcharge: 100,
@@ -65,6 +73,7 @@ const REGIONS = {
     flag: '🇮🇳',
     locale: 'en-IN',
     exchangeFromUSD: 90.0,
+    pppFromUSD: 23.0,
     baseSubsistence: 16000,
     techSurcharge: 1800,
     businessSurcharge: 1200,
@@ -102,6 +111,7 @@ const REGIONS = {
     flag: '🇬🇧',
     locale: 'en-GB',
     exchangeFromUSD: 0.79,
+    pppFromUSD: 0.69,
     baseSubsistence: 1050,
     techSurcharge: 120,
     businessSurcharge: 80,
@@ -139,6 +149,7 @@ const REGIONS = {
     flag: '🇨🇦',
     locale: 'en-CA',
     exchangeFromUSD: 1.38,
+    pppFromUSD: 1.23,
     baseSubsistence: 1450,
     techSurcharge: 160,
     businessSurcharge: 110,
@@ -176,6 +187,7 @@ const REGIONS = {
     flag: '🇪🇺',
     locale: 'de-DE',
     exchangeFromUSD: 0.92,
+    pppFromUSD: 0.77,
     baseSubsistence: 1150,
     techSurcharge: 130,
     businessSurcharge: 90,
@@ -213,6 +225,7 @@ const REGIONS = {
     flag: '🇦🇺',
     locale: 'en-AU',
     exchangeFromUSD: 1.52,
+    pppFromUSD: 1.46,
     baseSubsistence: 1650,
     techSurcharge: 180,
     businessSurcharge: 120,
@@ -250,6 +263,7 @@ const REGIONS = {
     flag: '🇸🇬',
     locale: 'en-SG',
     exchangeFromUSD: 1.34,
+    pppFromUSD: 0.83,
     baseSubsistence: 1300,
     techSurcharge: 150,
     businessSurcharge: 100,
@@ -431,36 +445,84 @@ function readJson(filePath, fallback = null) {
   return fallback;
 }
 
+// Write to a temp file then rename, so a crash mid-write can't leave a half-written data file.
+function writeFileAtomic(filePath, text) {
+  const tmp = `${filePath}.${process.pid}.tmp`;
+  fs.writeFileSync(tmp, text, 'utf8');
+  fs.renameSync(tmp, filePath);
+}
+
 function writeJson(filePath, data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+  writeFileAtomic(filePath, JSON.stringify(data, null, 2));
+}
+
+// Like readJson, but a file that exists and cannot be parsed is an error rather than "no data",
+// so callers never overwrite a damaged file with defaults.
+function readJsonStrict(filePath) {
+  if (!fs.existsSync(filePath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    throw new HttpError(500, `${path.basename(filePath)} is unreadable; refusing to overwrite it. Fix or remove the file.`);
+  }
+}
+
+// RFC 4180-style parser: quoted fields may contain commas, quotes ("") and newlines.
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') { field += '"'; i++; }
+        else inQuotes = false;
+      } else {
+        field += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ',') {
+      row.push(field); field = '';
+    } else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      row.push(field); field = '';
+      rows.push(row); row = [];
+    } else {
+      field += ch;
+    }
+  }
+  if (field !== '' || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+function csvEscape(value) {
+  const s = value === undefined || value === null ? '' : String(value);
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
 function readCsv(filePath) {
   if (!fs.existsSync(filePath)) return [];
-  const content = fs.readFileSync(filePath, 'utf8').trim();
-  if (!content) return [];
-  const lines = content.split('\n');
-  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-  const rows = [];
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
-    const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+  const content = fs.readFileSync(filePath, 'utf8');
+  if (!content.trim()) return [];
+  const parsed = parseCsv(content).filter(r => !(r.length === 1 && r[0].trim() === ''));
+  if (!parsed.length) return [];
+  const headers = parsed[0].map(h => h.trim());
+  return parsed.slice(1).map(values => {
     const row = {};
-    headers.forEach((h, idx) => {
-      row[h] = values[idx] || '';
-    });
-    rows.push(row);
-  }
-  return rows;
+    headers.forEach((h, idx) => { row[h] = (values[idx] || '').trim(); });
+    return row;
+  });
 }
 
 function writeCsv(filePath, headers, rows) {
-  const lines = [headers.join(',')];
+  const lines = [headers.map(csvEscape).join(',')];
   for (const r of rows) {
-    lines.push(headers.map(h => r[h] !== undefined ? r[h] : '').join(','));
+    lines.push(headers.map(h => csvEscape(r[h])).join(','));
   }
-  fs.writeFileSync(filePath, lines.join('\n'), 'utf8');
+  writeFileAtomic(filePath, lines.join('\n') + '\n');
 }
 
 function getLearnedRules() {
@@ -483,123 +545,86 @@ function getCustomCategories() {
   return DEFAULT_CUSTOM_CATEGORIES;
 }
 
-const STUDENT_LEXICON = {
-  food: [
-    'chipotle', 'trader joe', 'whole foods', 'sweetgreen', 'dining hall', 'meal plan', 'panera',
-    'dunkin', 'starbucks', 'panda express', 'in-n-out', 'shake shack', 'five guys', 'taco bell',
-    'wendys', 'chick-fil-a', 'subway', 'mcdonalds', 'kfc', 'dominos', 'pizza', 'burger', 'sandwich',
-    'doordash', 'uber eats', 'grubhub', 'postmates', 'instacart', 'groceries', 'safeway', 'kroger',
-    'wegmans', 'aldi', 'target grocery', 'costco food', 'cafe', 'bakery', 'boba', 'ice cream',
-    'pret', 'pret a manger', 'greggs', 'tesco', 'sainsburys', 'waitrose', 'm&s', 'deliveroo',
-    'just eat', 'mensa', 'carrefour', 'lidl', 'tim hortons', 'woolworths food', 'coles',
-    'canteen', 'mess', 'dabba', 'chai', 'tapri', 'coffee', 'maggi', 'swiggy', 'zomato',
-    'zepto', 'blinkit', 'instamart', 'biryani', 'shawarma', 'paratha', 'roll', 'samosa',
-    'snack', 'lunch', 'dinner', 'breakfast', 'haldiram', 'chaat', 'dosa', 'poha'
-  ],
-  travel: [
-    'uber', 'lyft', 'subway', 'metro', 'mta', 'clipper', 'bart', 'amtrak', 'caltrain',
-    'mbta', 'metrocard', 'ventra', 'septa', 'bus', 'transit', 'lime', 'bird', 'scooter',
-    'gas', 'petrol', 'shell', 'chevron', 'exxon', 'parking', 'toll', 'ezpass', 'fastrak',
-    'flight', 'airline', 'delta', 'united', 'southwest', 'american airlines',
-    'tfl', 'oyster', 'national rail', 'eurostar', 'deutsche bahn', 'flixbus', 'sncf',
-    'ttc', 'opal', 'myki', 'translink', 'ez-link', 'mrt',
-    'rapido', 'ola', 'auto', 'rickshaw', 'train', 'irctc', 'smartcard', 'local',
-    'bike', 'scooty', 'fare', 'yulu', 'redbus', 'indigo', 'air india'
-  ],
-  education: [
-    'book', 'textbook', 'library', 'fine', 'bookstore', 'campus bookstore', 'chegg',
-    'canvas', 'blackboard', 'pearson', 'mcgraw hill', 'cengage', 'quizlet', 'course hero',
-    'lab fee', 'tuition', 'course fee', 'blue book', 'scantron', 'printout', 'xerox',
-    'photocopy', 'notebook', 'register', 'binder', 'pen', 'stationery', 'calculator',
-    'ti-84', 'casio', 'kindle', 'udemy', 'coursera', 'edx', 'exam fee', 'certificate',
-    'ieee', 'hackathon fee', 'drafter', 'drawing board'
-  ],
-  technology: [
-    'laptop', 'macbook', 'charger', 'cable', 'type-c', 'usb', 'mouse', 'keyboard',
-    'monitor', 'headphone', 'earphone', 'airpods', 'earbuds', 'powerbank', 'wifi',
-    'router', 'broadband', 'fiber', 'icloud', 'google one', 'github', 'copilot',
-    'chatgpt', 'software', 'screen guard', 'adapter', 'dongle', 'ssd', 'hard disk',
-    'ipad', 'ipad pencil', 'stylus', 'apple', 'best buy', 'verizon', 'at&t', 't-mobile',
-    'jio', 'airtel', 'vi', 'spectrum', 'xfinity', 'comcast'
-  ],
-  utilities: [
-    'rent', 'dorm', 'residence', 'hostel', 'pg', 'deposit', 'room', 'electricity',
-    'water', 'gas bill', 'electric bill', 'pge', 'coned', 'heating', 'heater', 'cooler',
-    'laundry', 'washer', 'dryer', 'dry clean', 'cleaning', 'trash', 'maintenance',
-    'cook', 'maid', 'renters insurance'
-  ],
-  entertainment: [
-    'netflix', 'spotify', 'hulu', 'hbo', 'max', 'disney', 'disney+', 'apple music',
-    'youtube', 'movie', 'cinema', 'amc', 'regal', 'cinemark', 'pvr', 'inox',
-    'ticketmaster', 'stubhub', 'concert', 'fest', 'party', 'bar', 'pub', 'club',
-    'bowling', 'arcade', 'billiards', 'board game', 'steam', 'playstation', 'xbox', 'nintendo'
-  ],
-  healthcare: [
-    'pharmacy', 'cvs', 'walgreens', 'rite aid', 'boots', 'superdrug', 'apollo', '1mg',
-    'doctor', 'copay', 'co-pay', 'consultation', 'clinic', 'urgent care', 'campus health',
-    'student health', 'hospital', 'dental', 'dentist', 'vision', 'spectacle', 'lens',
-    'medicine', 'ibuprofen', 'advil', 'tylenol', 'paracetamol', 'crocin', 'band-aid',
-    'bandage', 'multivitamin', 'cough syrup', 'first aid', 'sanitizer'
-  ],
-  shopping: [
-    'amazon', 'target', 'walmart', 'costco', 'tj maxx', 'marshalls', 'zara', 'h&m',
-    'uniqlo', 'urban outfitters', 'thrift', 'goodwill', 'myntra', 'ajio', 'flipkart',
-    'clothes', 'shirt', 'tshirt', 'jeans', 'hoodie', 'jacket', 'shoes', 'sneakers',
-    'backpack', 'wallet', 'haircut', 'barber', 'salon', 'parlour', 'perfume', 'deodorant'
-  ],
-  emi: [
-    'sallie mae', 'student loan', 'fafsa', 'nelnet', 'mohela', 'aidvantage', 'sofi',
-    'loan', 'emi', 'installment', 'credit card payment', 'credit card bill', 'repayment',
-    'interest', 'klarna', 'afterpay', 'affirm', 'slice', 'uni', 'cred'
-  ],
-  investment: [
-    'vanguard', 'fidelity', 'charles schwab', 'robinhood', 'roth ira', '401k',
-    'index fund', 'etf', 's&p 500', 'stocks', 'sip', 'mutual fund', 'wealthsimple',
-    'trade republic', 'monzo', 'groww', 'zerodha', 'angel one', 'high yield savings', 'hysa'
-  ]
-};
-
+// Rule-based categorisation lives in lib/rules.js. This wrapper supplies the user's taught rules
+// and custom categories.
 function predictCategory(text) {
-  const normalized = text.toLowerCase().trim();
-  const randConf = (80 + Math.floor(Math.random() * 20)) / 100;
-  if (!normalized) return { category: 'miscellaneous', confidence: randConf, source: 'default' };
+  return predictByRules(text, { learned: getLearnedRules(), custom: getCustomCategories() });
+}
 
-  const memory = getLearnedRules();
-  if (memory[normalized]) {
-    return { category: memory[normalized], confidence: randConf, source: 'active_rule' };
-  }
+const ml = createMlClient({ rootDir: BASE_DIR });
+const ML_FEEDBACK_CSV = path.join(BASE_DIR, 'ml', 'data', 'user_feedback.csv');
 
-  const tokens = normalized.split(/[^a-z0-9]+/i).filter(Boolean);
-  for (const [phrase, cat] of Object.entries(memory)) {
-    const phraseTokens = phrase.split(/[^a-z0-9]+/i).filter(Boolean);
-    if (phraseTokens.length > 0 && phraseTokens.every(pt => tokens.includes(pt))) {
-      return { category: cat, confidence: randConf, source: 'rule_subset' };
+// Sources where the USER made the decision (taught rule, own category keywords). These always
+// win; everything else is decided by the ML model, with the keyword rules as a fallback.
+const USER_DECIDED_SOURCES = new Set(['user_rule_exact', 'user_rule_partial', 'custom_category']);
+
+async function classify(text) {
+  const rules = predictCategory(text);
+  if (USER_DECIDED_SOURCES.has(rules.source)) return { ...rules, engine: 'rules', needs_review: false };
+  if (ml.isReady()) {
+    try {
+      const p = await ml.predict(text);
+      return {
+        category: p.category, confidence: p.confidence, source: 'ml', engine: 'ml',
+        needs_review: !!p.needs_review, alternatives: p.alternatives || []
+      };
+    } catch (err) {
+      console.warn('[Penny] ML prediction failed, using rules:', err.message);
     }
   }
+  return { ...rules, engine: 'rules', needs_review: rules.confidence < 0.6 };
+}
 
-  const customCats = getCustomCategories();
-  for (const cc of customCats) {
-    if (cc.keywords && Array.isArray(cc.keywords)) {
-      for (const kw of cc.keywords) {
-        const kwNorm = kw.toLowerCase().trim();
-        if (!kwNorm) continue;
-        if (normalized.includes(kwNorm)) {
-          return { category: cc.id, confidence: randConf, source: 'custom_category' };
-        }
-      }
+async function classifyMany(texts) {
+  const results = new Array(texts.length);
+  const needMl = [];
+  texts.forEach((t, i) => {
+    const rules = predictCategory(t);
+    if (USER_DECIDED_SOURCES.has(rules.source)) results[i] = { ...rules, engine: 'rules', needs_review: false };
+    else needMl.push(i);
+  });
+  if (needMl.length && ml.isReady()) {
+    try {
+      const preds = await ml.predictMany(needMl.map(i => texts[i]));
+      needMl.forEach((i, k) => {
+        const p = preds[k];
+        results[i] = { category: p.category, confidence: p.confidence, source: 'ml', engine: 'ml', needs_review: !!p.needs_review, alternatives: p.alternatives || [] };
+      });
+    } catch (err) {
+      console.warn('[Penny] ML batch prediction failed, using rules:', err.message);
     }
   }
-
-  for (const [cat, kws] of Object.entries(STUDENT_LEXICON)) {
-    for (const kw of kws) {
-      if (!kw) continue;
-      if (normalized.includes(kw)) {
-        return { category: cat, confidence: randConf, source: 'lexicon' };
-      }
+  texts.forEach((t, i) => {
+    if (!results[i]) {
+      const r = predictCategory(t);
+      results[i] = { ...r, engine: 'rules', needs_review: r.confidence < 0.6 };
     }
-  }
+  });
+  return results;
+}
 
-  return { category: 'miscellaneous', confidence: randConf, source: 'default' };
+// Insert or replace one row (matched on a key column) in a small CSV file.
+function upsertCsvRow(file, headers, keyField, row) {
+  const rows = readCsv(file).filter(r => String(r[keyField]).toLowerCase() !== String(row[keyField]).toLowerCase());
+  rows.push(row);
+  writeCsv(file, headers, rows);
+}
+
+// Stored confidences are only trusted if a model produced them. Entries without one (older data,
+// samples) get a real prediction: the confidence that the stored label is right, or null when the
+// model disagrees with the stored label.
+async function annotateLedger(txns) {
+  const stale = txns.filter(t => !t.confidence_source || (t.confidence_source === 'rules' && ml.isReady()));
+  if (!stale.length) return txns;
+  const preds = await classifyMany(stale.map(t => t.description || ''));
+  stale.forEach((t, i) => {
+    const p = preds[i];
+    t.confidence = p.category === t.category ? p.confidence : null;
+    t.confidence_source = p.engine === 'ml' ? 'ml' : 'rules';
+    t.needs_review = p.category !== t.category || !!p.needs_review;
+  });
+  saveLedger(txns);
+  return txns;
 }
 
 function calculatePredictedBudget(profile) {
@@ -680,7 +705,7 @@ function getPeerBenchmarks(profile) {
     shopping: { col: 'personal_care', factor: cityMeta.lifestyle }
   };
 
-  const rate = region.exchangeFromUSD;
+  const rate = region.pppFromUSD || region.exchangeFromUSD;
   const benchmarks = [];
   let peerTuitionSum = 0;
   let peerTuitionCount = 0;
@@ -715,6 +740,8 @@ function getPeerBenchmarks(profile) {
   const peerTuitionAvg = Math.round(peerTuitionCount > 0 ? peerTuitionSum / peerTuitionCount : defaultTuition);
 
   return {
+    illustrative: true,
+    conversion: 'purchasing-power parity (approximate)',
     scope,
     cohort_size: cohort.length,
     college: profile.college || 'Unspecified Campus',
@@ -736,6 +763,14 @@ function getPeerBenchmarks(profile) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// HTTP layer
+// ---------------------------------------------------------------------------
+
+const HOST = process.env.HOST || '127.0.0.1';
+const MAX_BODY_BYTES = 100 * 1024;
+const ALLOWED_HOSTNAMES = new Set(['localhost', '127.0.0.1', '[::1]', HOST.toLowerCase()]);
+
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -747,341 +782,408 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
-const server = http.createServer((req, res) => {
-  const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
-  const pathname = parsedUrl.pathname;
-  const method = req.method;
-
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (method === 'OPTIONS') {
-    res.writeHead(204);
-    res.end();
-    return;
+class HttpError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.status = status;
   }
+}
+
+function sendJson(res, status, payload) {
+  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.end(JSON.stringify(payload));
+}
+
+function readJsonBody(req) {
+  return new Promise((resolve, reject) => {
+    const declared = parseInt(req.headers['content-length'] || '0', 10);
+    if (declared > MAX_BODY_BYTES) {
+      reject(new HttpError(413, 'Request body too large'));
+      return;
+    }
+    let size = 0;
+    let tooBig = false;
+    const chunks = [];
+    req.on('data', chunk => {
+      size += chunk.length;
+      if (size > MAX_BODY_BYTES) { tooBig = true; return; }
+      chunks.push(chunk);
+    });
+    req.on('end', () => {
+      if (tooBig) return reject(new HttpError(413, 'Request body too large'));
+      const raw = Buffer.concat(chunks).toString('utf8');
+      if (!raw.trim()) return resolve({});
+      try {
+        const value = JSON.parse(raw);
+        if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+          return reject(new HttpError(400, 'Request body must be a JSON object'));
+        }
+        resolve(value);
+      } catch {
+        reject(new HttpError(400, 'Invalid JSON'));
+      }
+    });
+    req.on('error', reject);
+  });
+}
+
+// --- validation helpers -----------------------------------------------------
+
+function vString(value, name, { max = 200, required = false } = {}) {
+  if (value === undefined || value === null || value === '') {
+    if (required) throw new HttpError(400, `${name} is required`);
+    return '';
+  }
+  if (typeof value !== 'string') throw new HttpError(400, `${name} must be text`);
+  const s = value.trim();
+  if (required && !s) throw new HttpError(400, `${name} is required`);
+  if (s.length > max) throw new HttpError(400, `${name} must be at most ${max} characters`);
+  return s;
+}
+
+function vNumber(value, name, { min = 0, max = 1e9, required = true, fallback = 0 } = {}) {
+  if (value === undefined || value === null || value === '') {
+    if (required) throw new HttpError(400, `${name} is required`);
+    return fallback;
+  }
+  const n = typeof value === 'number' ? value : (typeof value === 'string' ? Number(value) : NaN);
+  if (!Number.isFinite(n)) throw new HttpError(400, `${name} must be a number`);
+  if (n < min || n > max) throw new HttpError(400, `${name} must be between ${min} and ${max}`);
+  return n;
+}
+
+function vDate(value, name, { required = true } = {}) {
+  if (value === undefined || value === null || value === '') {
+    if (required) throw new HttpError(400, `${name} is required`);
+    return '';
+  }
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new HttpError(400, `${name} must be a date in YYYY-MM-DD format`);
+  }
+  const d = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== value) {
+    throw new HttpError(400, `${name} is not a valid date`);
+  }
+  return value;
+}
+
+function vId(raw, name = 'id') {
+  if (!/^\d{1,16}$/.test(String(raw))) throw new HttpError(400, `Invalid ${name}`);
+  return parseInt(raw, 10);
+}
+
+function knownCategoryIds() {
+  return new Set([...Object.keys(STUDENT_LEXICON), ...getCustomCategories().map(c => c.id)]);
+}
+
+function vCategory(value, name = 'category', { required = true } = {}) {
+  const s = vString(value, name, { max: 60, required }).toLowerCase();
+  if (!s) return '';
+  if (!knownCategoryIds().has(s) && s !== 'miscellaneous') {
+    throw new HttpError(400, `Unknown ${name}: ${s}`);
+  }
+  return s;
+}
+
+function vRegionCode(value, name = 'country') {
+  const s = vString(value, name, { max: 4 }).toUpperCase();
+  if (!s) return '';
+  if (!REGIONS[s]) throw new HttpError(400, `Unknown ${name}: ${s}`);
+  return s;
+}
+
+// --- data access ------------------------------------------------------------
+
+const GOAL_HEADERS = ['id', 'name', 'target_amount', 'saved_amount', 'deadline', 'priority', 'currency'];
+
+function currentRegion() {
+  return getRegionForProfile(readJson(USER_PROFILE_FILE, null));
+}
+
+// Every expense and goal remembers the currency it was entered in, so switching region
+// never reinterprets old amounts. Older rows with no currency are tagged with the current one.
+function loadLedger() {
+  const region = currentRegion();
+  const stored = readJsonStrict(USER_LEDGER_FILE);
+  if (!Array.isArray(stored)) {
+    const demo = region.demoExpenses.map(e => ({ ...e, currency: region.currency }));
+    writeJson(USER_LEDGER_FILE, demo);
+    return demo;
+  }
+  let changed = false;
+  const tagged = stored.map(t => {
+    if (t && !t.currency) { changed = true; return { ...t, currency: region.currency }; }
+    return t;
+  });
+  if (changed) writeJson(USER_LEDGER_FILE, tagged);
+  return tagged;
+}
+
+function saveLedger(txns) {
+  writeJson(USER_LEDGER_FILE, txns);
+}
+
+function loadGoals() {
+  const region = currentRegion();
+  if (!fs.existsSync(GOALS_CSV)) {
+    const demo = region.demoGoals.map(g => ({ ...g, currency: region.currency }));
+    saveGoals(demo);
+    return demo;
+  }
+  let changed = false;
+  const goals = readCsv(GOALS_CSV).map(r => {
+    if (!r.currency) changed = true;
+    return {
+      id: parseInt(r.id, 10),
+      name: r.name,
+      target_amount: parseFloat(r.target_amount || 0),
+      saved_amount: parseFloat(r.saved_amount || 0),
+      deadline: r.deadline,
+      priority: r.priority,
+      currency: r.currency || region.currency
+    };
+  });
+  if (changed) saveGoals(goals);
+  return goals;
+}
+
+function saveGoals(goals) {
+  writeCsv(GOALS_CSV, GOAL_HEADERS, goals);
+}
+
+function buildProfile(body) {
+  const region = vRegionCode(body.country) || getRegionForProfile(body).code;
+  const period = body.tuition_period === 'semester' ? 'semester' : 'annual';
+  const college = vString(body.college, 'college', { max: 120, required: true });
+  // A known college fixes the campus location; only "Other"/custom colleges can choose a city.
+  const knownCollege = COLLEGES.find(c => c.name === college && !c.name.startsWith('Other'));
+  const campusCity = knownCollege ? knownCollege.city : vString(body.campus_city, 'campus_city', { max: 80 });
+  return {
+    name: vString(body.name, 'name', { max: 80 }) || 'Student Scholar',
+    college,
+    campus_city: campusCity,
+    country: region,
+    major: vString(body.major, 'major', { max: 60 }),
+    year_in_school: vString(body.year_in_school, 'year_in_school', { max: 30 }),
+    tuition_amount: vNumber(body.tuition_amount, 'tuition_amount', { min: 0, max: 1e9 }),
+    tuition_period: period,
+    monthly_income: vNumber(body.monthly_income, 'monthly_income', { min: 0, max: 1e9 }),
+    financial_aid: vNumber(body.financial_aid, 'financial_aid', { min: 0, max: 1e9 }),
+    age: vNumber(body.age, 'age', { min: 14, max: 100, required: false, fallback: 20 }),
+    gender: vString(body.gender, 'gender', { max: 30 }),
+    preferred_payment_method: vString(body.preferred_payment_method, 'preferred_payment_method', { max: 40 })
+  };
+}
+
+// --- API --------------------------------------------------------------------
+
+async function handleApi(req, res, pathname, method) {
+  let m;
 
   if (pathname === '/api/profile' && method === 'GET') {
     const profile = readJson(USER_PROFILE_FILE, null);
-    res.writeHead(200, { 'Content-Type': 'application/json' });
     if (profile && profile.college) {
-      const budgetMeta = calculatePredictedBudget(profile);
-      res.end(JSON.stringify({ exists: true, profile, ...budgetMeta }));
-    } else {
-      res.end(JSON.stringify({ exists: false }));
+      return sendJson(res, 200, { exists: true, profile, ...calculatePredictedBudget(profile) });
     }
-    return;
+    return sendJson(res, 200, { exists: false });
   }
 
   if (pathname === '/api/profile' && method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
-      try {
-        const profile = JSON.parse(body);
-        if (!profile.country) {
-          const reg = getRegionForProfile(profile);
-          profile.country = reg.code;
-        }
-        writeJson(USER_PROFILE_FILE, profile);
-        const budgetMeta = calculatePredictedBudget(profile);
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true, profile, ...budgetMeta }));
-      } catch (err) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: err.message }));
-      }
-    });
-    return;
+    const profile = buildProfile(await readJsonBody(req));
+    writeJson(USER_PROFILE_FILE, profile);
+    return sendJson(res, 200, { success: true, profile, ...calculatePredictedBudget(profile) });
   }
 
   if (pathname === '/api/transactions' && method === 'GET') {
-    let txns = readJson(USER_LEDGER_FILE, null);
-    if (!txns) {
-      const profile = readJson(USER_PROFILE_FILE, null);
-      const reg = getRegionForProfile(profile);
-      txns = reg.demoExpenses;
-      writeJson(USER_LEDGER_FILE, txns);
-    }
-    const withConfidence = txns.map(t => {
-      if (typeof t.confidence === 'number' && t.confidence >= 0.80 && t.confidence <= 0.99) return t;
-      const seed = Math.abs(((t.id || 1) * 23) + ((t.amount || 1) * 7));
-      return { ...t, confidence: (80 + (seed % 20)) / 100 };
-    });
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(withConfidence));
-    return;
+    return sendJson(res, 200, await annotateLedger(loadLedger()));
   }
 
   if (pathname === '/api/transactions' && method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
-      try {
-        const item = JSON.parse(body);
-        const profile = readJson(USER_PROFILE_FILE, null);
-        const reg = getRegionForProfile(profile);
-        const txns = readJson(USER_LEDGER_FILE, reg.demoExpenses);
+    const body = await readJsonBody(req);
+    const description = vString(body.description, 'description', { max: 200, required: true });
+    const amount = vNumber(body.amount, 'amount', { min: 0.01, max: 1e9 });
+    const date = vDate(body.date || new Date().toISOString().slice(0, 10), 'date');
+    const pred = await classify(description);
+    const chosen = vCategory(body.category, 'category', { required: false });
+    // The category and confidence always come from the server. If the user picked a category that
+    // differs from the prediction, that is their decision (confidence 1, source "user").
+    let category = pred.category || 'miscellaneous';
+    let confidence = pred.confidence;
+    let confidenceSource = pred.engine === 'ml' ? 'ml' : 'rules';
+    let needsReview = !!pred.needs_review;
+    if (chosen && chosen !== pred.category) {
+      category = chosen; confidence = 1; confidenceSource = 'user'; needsReview = false;
+    }
 
-        const pred = predictCategory(item.description || '');
-        const category = item.category || pred.category || 'miscellaneous';
-        const confidence = (typeof item.confidence === 'number' && item.confidence >= 0.80 && item.confidence <= 0.99)
-          ? item.confidence
-          : pred.confidence;
+    const txns = loadLedger();
+    let id = Date.now() + Math.floor(Math.random() * 1000);
+    const used = new Set(txns.map(t => t.id));
+    while (used.has(id)) id++;
 
-        const newTxn = {
-          ...item,
-          category,
-          confidence,
-          id: Date.now() + Math.floor(Math.random() * 1000)
-        };
-        txns.unshift(newTxn);
-        writeJson(USER_LEDGER_FILE, txns);
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true, transaction: newTxn, all: txns }));
-      } catch (err) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: err.message }));
-      }
-    });
-    return;
-  }
-
-  if (pathname.startsWith('/api/transactions/') && method === 'DELETE') {
-    const id = parseInt(pathname.split('/').pop(), 10);
-    const profile = readJson(USER_PROFILE_FILE, null);
-    const reg = getRegionForProfile(profile);
-    let txns = readJson(USER_LEDGER_FILE, reg.demoExpenses);
-    txns = txns.filter(t => t.id !== id);
-    writeJson(USER_LEDGER_FILE, txns);
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ success: true, all: txns }));
-    return;
+    const newTxn = { id, date, description, category, amount, confidence, confidence_source: confidenceSource, needs_review: needsReview, currency: currentRegion().currency };
+    txns.unshift(newTxn);
+    saveLedger(txns);
+    return sendJson(res, 200, { success: true, transaction: newTxn, all: txns });
   }
 
   if (pathname === '/api/transactions/reset' && method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
-      let regionCode = null;
-      try {
-        if (body) {
-          const parsed = JSON.parse(body);
-          if (parsed.country) regionCode = parsed.country;
-        }
-      } catch {}
-      
-      const profile = readJson(USER_PROFILE_FILE, null);
-      const reg = regionCode && REGIONS[regionCode] ? REGIONS[regionCode] : getRegionForProfile(profile);
-      writeJson(USER_LEDGER_FILE, reg.demoExpenses);
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: true, all: reg.demoExpenses, region: reg.code }));
-    });
-    return;
+    // Replaces only the demo data for one currency; entries in other currencies are kept.
+    const body = await readJsonBody(req);
+    const reg = REGIONS[vRegionCode(body.country)] || currentRegion();
+    const kept = loadLedger().filter(t => t.currency !== reg.currency);
+    const all = [...reg.demoExpenses.map(e => ({ ...e, currency: reg.currency })), ...kept];
+    saveLedger(all);
+    return sendJson(res, 200, { success: true, all, region: reg.code });
   }
 
   if (pathname === '/api/transactions/clear' && method === 'POST') {
-    writeJson(USER_LEDGER_FILE, []);
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ success: true, all: [] }));
-    return;
+    saveLedger([]);
+    return sendJson(res, 200, { success: true, all: [] });
+  }
+
+  if ((m = pathname.match(/^\/api\/transactions\/([^/]+)$/)) && method === 'PATCH') {
+    const id = vId(m[1]);
+    const body = await readJsonBody(req);
+    const category = vCategory(body.category, 'category');
+    const txns = loadLedger();
+    const txn = txns.find(t => t.id === id);
+    if (!txn) throw new HttpError(404, 'Transaction not found');
+    txn.category = category;
+    txn.confidence = 1;
+    txn.confidence_source = 'user';
+    txn.needs_review = false;
+    saveLedger(txns);
+    return sendJson(res, 200, { success: true, transaction: txn });
+  }
+
+  if ((m = pathname.match(/^\/api\/transactions\/([^/]+)$/)) && method === 'DELETE') {
+    const id = vId(m[1]);
+    const txns = loadLedger();
+    if (!txns.some(t => t.id === id)) throw new HttpError(404, 'Transaction not found');
+    const remaining = txns.filter(t => t.id !== id);
+    saveLedger(remaining);
+    return sendJson(res, 200, { success: true, all: remaining });
   }
 
   if (pathname === '/api/goals' && method === 'GET') {
-    let goals = [];
-    if (fs.existsSync(GOALS_CSV)) {
-      const rows = readCsv(GOALS_CSV);
-      goals = rows.map(r => ({
-        id: parseInt(r.id, 10),
-        name: r.name,
-        target_amount: parseFloat(r.target_amount || 0),
-        saved_amount: parseFloat(r.saved_amount || 0),
-        deadline: r.deadline,
-        priority: r.priority
-      }));
-    } else {
-      const profile = readJson(USER_PROFILE_FILE, null);
-      const reg = getRegionForProfile(profile);
-      goals = reg.demoGoals;
-      writeCsv(GOALS_CSV, ['id', 'name', 'target_amount', 'saved_amount', 'deadline', 'priority'], goals);
-    }
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(goals));
-    return;
+    return sendJson(res, 200, loadGoals());
   }
 
   if (pathname === '/api/goals' && method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
-      try {
-        const item = JSON.parse(body);
-        const rows = fs.existsSync(GOALS_CSV) ? readCsv(GOALS_CSV) : [];
-        const nextId = rows.reduce((max, r) => Math.max(max, parseInt(r.id, 10) || 0), 0) + 1;
-        const newGoal = {
-          id: nextId,
-          name: item.name,
-          target_amount: item.target_amount,
-          saved_amount: item.saved_amount || 0,
-          deadline: item.deadline,
-          priority: item.priority || 'Medium'
-        };
-        rows.push(newGoal);
-        writeCsv(GOALS_CSV, ['id', 'name', 'target_amount', 'saved_amount', 'deadline', 'priority'], rows);
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true, goal: newGoal }));
-      } catch (err) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: err.message }));
-      }
-    });
-    return;
+    const body = await readJsonBody(req);
+    const name = vString(body.name, 'name', { max: 100, required: true });
+    const target = vNumber(body.target_amount, 'target_amount', { min: 1, max: 1e9 });
+    const saved = vNumber(body.saved_amount, 'saved_amount', { min: 0, max: 1e9, required: false, fallback: 0 });
+    if (saved > target) throw new HttpError(400, 'saved_amount cannot exceed target_amount');
+    const deadline = vDate(body.deadline, 'deadline');
+    const priority = ['High', 'Medium', 'Low'].includes(body.priority) ? body.priority : 'Medium';
+
+    const goals = loadGoals();
+    const nextId = goals.reduce((max, g) => Math.max(max, g.id || 0), 0) + 1;
+    const newGoal = {
+      id: nextId, name, target_amount: target, saved_amount: saved, deadline, priority,
+      currency: currentRegion().currency
+    };
+    goals.push(newGoal);
+    saveGoals(goals);
+    return sendJson(res, 200, { success: true, goal: newGoal });
   }
 
   if (pathname === '/api/goals/reset' && method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
-      let regionCode = null;
-      try {
-        if (body) {
-          const parsed = JSON.parse(body);
-          if (parsed.country) regionCode = parsed.country;
-        }
-      } catch {}
-      
-      const profile = readJson(USER_PROFILE_FILE, null);
-      const reg = regionCode && REGIONS[regionCode] ? REGIONS[regionCode] : getRegionForProfile(profile);
-      writeCsv(GOALS_CSV, ['id', 'name', 'target_amount', 'saved_amount', 'deadline', 'priority'], reg.demoGoals);
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: true, all: reg.demoGoals, region: reg.code }));
-    });
-    return;
+    // Replaces only the default goals for one currency; goals in other currencies are kept.
+    const body = await readJsonBody(req);
+    const reg = REGIONS[vRegionCode(body.country)] || currentRegion();
+    const kept = loadGoals().filter(g => g.currency !== reg.currency);
+    const all = [...reg.demoGoals.map(g => ({ ...g, currency: reg.currency })), ...kept];
+    // keep ids unique across the combined list
+    all.forEach((g, i) => { g.id = i + 1; });
+    saveGoals(all);
+    return sendJson(res, 200, { success: true, all, region: reg.code });
   }
 
-  if (pathname.includes('/deposit') && method === 'POST') {
-    const parts = pathname.split('/');
-    const id = parseInt(parts[3], 10);
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
-      try {
-        const { amount } = JSON.parse(body);
-        const rows = fs.existsSync(GOALS_CSV) ? readCsv(GOALS_CSV) : [];
-        for (const r of rows) {
-          if (parseInt(r.id, 10) === id) {
-            r.saved_amount = Math.min(parseFloat(r.saved_amount || 0) + parseFloat(amount), parseFloat(r.target_amount || 0));
-            break;
-          }
-        }
-        writeCsv(GOALS_CSV, ['id', 'name', 'target_amount', 'saved_amount', 'deadline', 'priority'], rows);
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true, all: rows }));
-      } catch (err) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: err.message }));
-      }
-    });
-    return;
+  if ((m = pathname.match(/^\/api\/goals\/([^/]+)\/deposit$/)) && method === 'POST') {
+    const id = vId(m[1]);
+    const body = await readJsonBody(req);
+    const amount = vNumber(body.amount, 'amount', { min: 0.01, max: 1e9 });
+    const goals = loadGoals();
+    const goal = goals.find(g => g.id === id);
+    if (!goal) throw new HttpError(404, 'Goal not found');
+    goal.saved_amount = Math.min(goal.saved_amount + amount, goal.target_amount);
+    saveGoals(goals);
+    return sendJson(res, 200, { success: true, all: goals });
   }
 
-  if (pathname.startsWith('/api/goals/') && method === 'DELETE') {
-    const id = parseInt(pathname.split('/').pop(), 10);
-    let rows = fs.existsSync(GOALS_CSV) ? readCsv(GOALS_CSV) : [];
-    rows = rows.filter(r => parseInt(r.id, 10) !== id);
-    writeCsv(GOALS_CSV, ['id', 'name', 'target_amount', 'saved_amount', 'deadline', 'priority'], rows);
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ success: true, all: rows }));
-    return;
+  if ((m = pathname.match(/^\/api\/goals\/([^/]+)$/)) && method === 'DELETE') {
+    const id = vId(m[1]);
+    const goals = loadGoals();
+    if (!goals.some(g => g.id === id)) throw new HttpError(404, 'Goal not found');
+    const remaining = goals.filter(g => g.id !== id);
+    saveGoals(remaining);
+    return sendJson(res, 200, { success: true, all: remaining });
   }
 
   if (pathname === '/api/categories' && method === 'GET') {
-    const custom = getCustomCategories();
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ custom, builtIn: Object.keys(STUDENT_LEXICON) }));
-    return;
+    return sendJson(res, 200, { custom: getCustomCategories(), builtIn: Object.keys(STUDENT_LEXICON) });
   }
 
   if (pathname === '/api/categories' && method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
-      try {
-        const item = JSON.parse(body);
-        const custom = getCustomCategories();
-        const id = (item.id || item.name.toLowerCase().replace(/[^a-z0-9]/g, '_')).trim();
-        const keywords = Array.isArray(item.keywords)
-          ? item.keywords.map(k => k.toLowerCase().trim()).filter(Boolean)
-          : (item.keywords || '').split(',').map(k => k.toLowerCase().trim()).filter(Boolean);
+    const body = await readJsonBody(req);
+    const name = vString(body.name, 'name', { max: 40, required: true });
+    const rawId = vString(body.id, 'id', { max: 40 }) || name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const id = rawId.toLowerCase();
+    if (!/^[a-z0-9_]{1,40}$/.test(id)) throw new HttpError(400, 'Category id may only contain letters, numbers and underscores');
+    if (STUDENT_LEXICON[id] || id === 'miscellaneous') throw new HttpError(400, `"${id}" is a built-in category`);
 
-        const newCat = {
-          id,
-          name: item.name.trim(),
-          color: item.color || '#0284C7',
-          keywords
-        };
+    const color = body.color === undefined || body.color === '' ? '#0284C7' : body.color;
+    if (typeof color !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(color)) {
+      throw new HttpError(400, 'color must be a hex value like #0284C7');
+    }
+    const rawKeywords = Array.isArray(body.keywords)
+      ? body.keywords
+      : (typeof body.keywords === 'string' ? body.keywords.split(',') : []);
+    if (rawKeywords.length > 50) throw new HttpError(400, 'At most 50 keywords per category');
+    const keywords = rawKeywords.map(k => {
+      if (typeof k !== 'string') throw new HttpError(400, 'Keywords must be text');
+      const kw = k.toLowerCase().trim();
+      if (kw.length > 40) throw new HttpError(400, 'Keywords must be at most 40 characters');
+      return kw;
+    }).filter(Boolean);
 
-        const existingIdx = custom.findIndex(c => c.id === id);
-        if (existingIdx >= 0) {
-          custom[existingIdx] = newCat;
-        } else {
-          custom.push(newCat);
-        }
-        writeJson(CUSTOM_CATEGORIES_FILE, custom);
-
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true, category: newCat, all: custom }));
-      } catch (err) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: err.message }));
-      }
-    });
-    return;
+    const custom = getCustomCategories();
+    const newCat = { id, name, color, keywords };
+    const existingIdx = custom.findIndex(c => c.id === id);
+    if (existingIdx >= 0) custom[existingIdx] = newCat;
+    else custom.push(newCat);
+    writeJson(CUSTOM_CATEGORIES_FILE, custom);
+    return sendJson(res, 200, { success: true, category: newCat, all: custom });
   }
 
   if (pathname === '/api/nlp/predict' && method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
-      try {
-        const { text } = JSON.parse(body);
-        const result = predictCategory(text || '');
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(result));
-      } catch (err) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: err.message }));
-      }
-    });
-    return;
+    const body = await readJsonBody(req);
+    const text = vString(body.text, 'text', { max: 500 });
+    return sendJson(res, 200, await classify(text));
   }
 
   if (pathname === '/api/nlp/teach' && method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
-      try {
-        const { text, category } = JSON.parse(body);
-        const normText = text.toLowerCase().trim();
-        const normCat = category.toLowerCase().trim();
+    const body = await readJsonBody(req);
+    const normText = vString(body.text, 'text', { max: 200, required: true }).toLowerCase();
+    const normCat = vCategory(body.category, 'category');
 
-        const learned = fs.existsSync(LEARNED_CSV) ? readCsv(LEARNED_CSV) : [];
-        learned.push({ transaction_text: normText, category: normCat });
-        writeCsv(LEARNED_CSV, ['transaction_text', 'category'], learned);
+    // Re-teaching the same text replaces the old rule instead of piling up duplicates.
+    upsertCsvRow(LEARNED_CSV, ['transaction_text', 'category'], 'transaction_text', { transaction_text: normText, category: normCat });
+    upsertCsvRow(FEEDBACK_CSV, ['transaction_text', 'category'], 'transaction_text', { transaction_text: normText, category: normCat });
+    fs.mkdirSync(path.dirname(ML_FEEDBACK_CSV), { recursive: true });
+    upsertCsvRow(ML_FEEDBACK_CSV, ['text', 'category'], 'text', { text: normText, category: normCat });
 
-        const feedback = fs.existsSync(FEEDBACK_CSV) ? readCsv(FEEDBACK_CSV) : [];
-        feedback.push({ transaction_text: normText, category: normCat });
-        writeCsv(FEEDBACK_CSV, ['transaction_text', 'category'], feedback);
-
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true, learned: { text: normText, category: normCat } }));
-      } catch (err) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: err.message }));
+    // The ML model learns from the correction straight away (it refits in about a quarter of a second).
+    let mlLearned = false;
+    if (ml.isReady()) {
+      try { await ml.feedback(normText, normCat); mlLearned = true; } catch (err) {
+        // custom categories are not known to the model; the taught rule still applies
+        if (!/not a category the model knows/.test(err.message)) console.warn('[Penny] ML feedback failed:', err.message);
       }
-    });
-    return;
+    }
+    return sendJson(res, 200, { success: true, learned: { text: normText, category: normCat }, ml_updated: mlLearned });
   }
 
   if (pathname === '/api/peer-benchmarks' && method === 'GET') {
@@ -1097,51 +1199,68 @@ const server = http.createServer((req, res) => {
       tuition_amount: 34000,
       tuition_period: 'annual'
     });
-    const result = getPeerBenchmarks(profile);
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(result));
-    return;
+    return sendJson(res, 200, getPeerBenchmarks(profile));
   }
 
   if (pathname === '/api/colleges' && method === 'GET') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ colleges: COLLEGES, cities: Object.keys(CITY_COLI), regions: REGIONS }));
-    return;
+    return sendJson(res, 200, { colleges: COLLEGES, cities: Object.keys(CITY_COLI), regions: REGIONS });
+  }
+
+  if (pathname === '/api/ml/status' && method === 'GET') {
+    return sendJson(res, 200, ml.status());
+  }
+
+  if (pathname === '/api/ml/retrain' && method === 'POST') {
+    if (!ml.isReady()) throw new HttpError(503, 'ML service is not running');
+    return sendJson(res, 200, await ml.retrain());
+  }
+
+  if (pathname === '/api/insights' && method === 'GET') {
+    if (!ml.isReady()) {
+      return sendJson(res, 200, { available: false, reason: ml.status().status === 'starting' ? 'The ML service is still starting.' : 'The ML service is not running.' });
+    }
+    const profile = readJson(USER_PROFILE_FILE, null);
+    if (!profile || !profile.college) return sendJson(res, 200, { available: false, reason: 'No profile yet.' });
+    const budgetMeta = calculatePredictedBudget(profile);
+    const region = getRegionForProfile(profile);
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const inCurrency = e => !e.currency || e.currency === region.currency;
+    try {
+      const result = await ml.insights({
+        today,
+        transactions: loadLedger().filter(inCurrency).map(t => ({ id: t.id, date: t.date, description: t.description, category: t.category, amount: t.amount })),
+        goals: loadGoals().filter(inCurrency),
+        profile: {
+          prior_budget: budgetMeta.predicted_budget,
+          monthly_inflow: budgetMeta.gross_inflow,
+          monthly_tuition: budgetMeta.monthly_tuition_amortized,
+          currency: region.currency
+        }
+      });
+      return sendJson(res, 200, { available: true, ...result });
+    } catch (err) {
+      console.warn('[Penny] insights failed:', err.message);
+      return sendJson(res, 200, { available: false, reason: 'The ML service could not compute insights.' });
+    }
   }
 
   if (pathname === '/api/diagnostics' && method === 'GET') {
-    const learnedRules = getLearnedRules();
-    const customCats = getCustomCategories();
     const profile = readJson(USER_PROFILE_FILE, null);
-    const reg = getRegionForProfile(profile);
-
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      nlp_model: {
-        architecture: "Word (1-2) + Char (3-5) TF-IDF & MultinomialNB + High-Priority Memory Store",
-        precision: 0.9904,
-        accuracy: 0.9951,
-        recall: 0.9951,
-        f1_score: 0.9927,
-        inference_latency_ms: 3.4,
-        active_rules_count: Object.keys(learnedRules).length,
-        lexicon_entries: 320,
-        custom_categories_count: customCats.length
+    const region = getRegionForProfile(profile);
+    let metrics = null;
+    if (ml.isReady()) {
+      try { metrics = await ml.metrics(); } catch (err) { console.warn('[Penny] metrics failed:', err.message); }
+    }
+    return sendJson(res, 200, {
+      ml: { ...ml.status(), metrics },
+      rules: {
+        lexicon_keywords: Object.values(STUDENT_LEXICON).reduce((n, kws) => n + kws.length, 0),
+        taught_rules: Object.keys(getLearnedRules()).length,
+        custom_categories: getCustomCategories().length
       },
-      budget_model: {
-        architecture: "Tuition-Amortized & COLI-Calibrated Demographic Stratification",
-        adherence_reliability: 0.946,
-        mean_absolute_error: reg.mae,
-        currency: reg.currency,
-        currency_symbol: reg.symbol,
-        region_code: reg.code,
-        region_name: reg.name,
-        tuition_sensitivity_index: 0.92,
-        guardrail: "85% Net Disposable Inflow Floor",
-        cohort_dataset_records: 1000
-      }
-    }));
-    return;
+      region: { code: region.code, currency: region.currency, symbol: region.symbol }
+    });
   }
 
   if (pathname === '/api/meta' && method === 'GET') {
@@ -1154,39 +1273,127 @@ const server = http.createServer((req, res) => {
       years = [...new Set(rows.map(r => r.year_in_school).filter(Boolean))].sort();
       payments = [...new Set(rows.map(r => r.preferred_payment_method).filter(Boolean))].sort();
     }
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      majors,
-      years,
-      payments,
+    return sendJson(res, 200, {
+      majors, years, payments,
       colleges: COLLEGES,
       cities: Object.keys(CITY_COLI),
       categories: Object.keys(STUDENT_LEXICON),
       regions: REGIONS
-    }));
+    });
+  }
+
+  throw new HttpError(404, 'Not found');
+}
+
+// --- static files (only ever served from ./public) ----------------------------
+
+function serveStatic(req, res, pathname, method) {
+  if (method !== 'GET' && method !== 'HEAD') {
+    res.writeHead(405, { 'Content-Type': 'text/plain', Allow: 'GET, HEAD' });
+    res.end('Method Not Allowed');
     return;
   }
 
-  let filePath = path.join(PUBLIC_DIR, pathname === '/' ? 'index.html' : pathname);
-
-  if (!fs.existsSync(filePath)) {
-    const rootPath = path.join(BASE_DIR, pathname);
-    if (fs.existsSync(rootPath) && !fs.statSync(rootPath).isDirectory()) {
-      filePath = rootPath;
-    }
+  let rel;
+  try {
+    rel = decodeURIComponent(pathname);
+  } catch {
+    res.writeHead(400, { 'Content-Type': 'text/plain' });
+    res.end('Bad Request');
+    return;
+  }
+  if (rel.includes('\0')) {
+    res.writeHead(400, { 'Content-Type': 'text/plain' });
+    res.end('Bad Request');
+    return;
   }
 
-  if (fs.existsSync(filePath) && !fs.statSync(filePath).isDirectory()) {
-    const ext = path.extname(filePath).toLowerCase();
-    const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-    res.writeHead(200, { 'Content-Type': contentType });
-    fs.createReadStream(filePath).pipe(res);
-  } else {
+  const publicRoot = fs.realpathSync(PUBLIC_DIR);
+  const requested = path.resolve(publicRoot, '.' + (rel === '/' ? '/index.html' : rel));
+  let filePath = null;
+  try {
+    const real = fs.realpathSync(requested);
+    const inside = real.startsWith(publicRoot + path.sep);
+    if (inside && fs.statSync(real).isFile()) filePath = real;
+  } catch {
+    filePath = null;
+  }
+
+  if (!filePath) {
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('Not Found');
+    return;
   }
+
+  const ext = path.extname(filePath).toLowerCase();
+  res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
+  if (method === 'HEAD') {
+    res.end();
+    return;
+  }
+  fs.createReadStream(filePath).pipe(res);
+}
+
+// --- server -------------------------------------------------------------------
+
+const server = http.createServer(async (req, res) => {
+  // Basic hardening headers on every response.
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+
+  // Reject requests whose Host header isn't a local name (defends against DNS rebinding).
+  const hostHeader = String(req.headers.host || '').toLowerCase();
+  const hostname = hostHeader.startsWith('[') ? hostHeader.slice(0, hostHeader.indexOf(']') + 1) : hostHeader.split(':')[0];
+  if (!ALLOWED_HOSTNAMES.has(hostname)) {
+    res.writeHead(403, { 'Content-Type': 'text/plain' });
+    res.end('Forbidden');
+    return;
+  }
+
+  let pathname;
+  try {
+    pathname = new URL(req.url, 'http://localhost').pathname;
+  } catch {
+    res.writeHead(400, { 'Content-Type': 'text/plain' });
+    res.end('Bad Request');
+    return;
+  }
+  const method = req.method;
+
+  if (pathname.startsWith('/api/')) {
+    try {
+      // No CORS headers are sent. Requiring a JSON content type on writes also forces browsers
+      // to run a CORS preflight for cross-site requests, which then fail.
+      if (method !== 'GET' && method !== 'DELETE') {
+        const type = String(req.headers['content-type'] || '').toLowerCase();
+        if (!type.startsWith('application/json')) throw new HttpError(415, 'Content-Type must be application/json');
+      }
+      await handleApi(req, res, pathname, method);
+    } catch (err) {
+      if (res.headersSent) return;
+      if (err instanceof HttpError) {
+        sendJson(res, err.status, { error: err.message });
+      } else {
+        console.error('[Penny] Unhandled error:', err);
+        sendJson(res, 500, { error: 'Internal server error' });
+      }
+    }
+    return;
+  }
+
+  serveStatic(req, res, pathname, method);
 });
 
-server.listen(PORT, () => {
-  console.log(`[Penny Node Engine] Server running at http://localhost:${PORT}`);
+server.listen(PORT, HOST, () => {
+  console.log(`[Penny Node Engine] Server running at http://localhost:${PORT} (bound to ${HOST})`);
+  ml.start();
 });
+
+function shutdown() {
+  ml.stop();
+  process.exit(0);
+}
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
+process.on('exit', () => ml.stop());

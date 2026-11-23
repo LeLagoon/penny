@@ -2,3 +2,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 .DS_Store
+
+# ML artifacts and local learning data
+ml/artifacts/
+ml/data/user_feedback.csv

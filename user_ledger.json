@@ -2,71 +2,111 @@
   {
     "id": 1,
     "date": "2026-11-11",
-    "description": "Campus Canteen Lunch Meal",
+    "description": "Tim Hortons & Campus Lunch Meal",
     "category": "food",
-    "amount": 240
+    "amount": 16,
+    "currency": "CAD",
+    "confidence": 0.9959,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 2,
     "date": "2026-11-10",
-    "description": "Metro Rail Monthly Pass Recharge",
+    "description": "TTC / Transit Monthly Student Pass",
     "category": "travel",
-    "amount": 600
+    "amount": 75,
+    "currency": "CAD",
+    "confidence": 0.964,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 3,
     "date": "2026-11-08",
     "description": "Algorithms Reference Textbook (2nd Ed)",
     "category": "education",
-    "amount": 1350
+    "amount": 125,
+    "currency": "CAD",
+    "confidence": 0.9808,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 4,
     "date": "2026-11-06",
-    "description": "Hostel Dedicated Fiber Internet",
+    "description": "Residence Fiber Broadband Internet",
     "category": "utilities",
-    "amount": 799
+    "amount": 65,
+    "currency": "CAD",
+    "confidence": null,
+    "confidence_source": "ml",
+    "needs_review": true
   },
   {
     "id": 5,
     "date": "2026-11-04",
     "description": "Logitech MX Master Optical Peripheral",
     "category": "technology",
-    "amount": 1850
+    "amount": 115,
+    "currency": "CAD",
+    "confidence": 0.9275,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 6,
     "date": "2026-11-02",
-    "description": "Prescription Flu & Vitamin Medications",
+    "description": "Shoppers Drug Mart Vitamins & Medicine",
     "category": "healthcare",
-    "amount": 420
+    "amount": 32,
+    "currency": "CAD",
+    "confidence": 0.9747,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 7,
     "date": "2026-10-30",
     "description": "Weekend Roommates Dinner Outing",
     "category": "food",
-    "amount": 780
+    "amount": 48,
+    "currency": "CAD",
+    "confidence": 0.8699,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 8,
     "date": "2026-10-27",
-    "description": "Index Fund Monthly SIP",
+    "description": "Wealthsimple Index ETF Contribution",
     "category": "investment",
-    "amount": 2000
+    "amount": 150,
+    "currency": "CAD",
+    "confidence": 0.9995,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 9,
     "date": "2026-10-24",
-    "description": "Laptop Equipment EMI Payment",
+    "description": "Laptop Equipment Monthly Payment",
     "category": "emi",
-    "amount": 3200
+    "amount": 130,
+    "currency": "CAD",
+    "confidence": 0.8882,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 10,
     "date": "2026-10-21",
-    "description": "Weekly Grocery Mart Provisions",
+    "description": "Metro Mart Weekly Grocery Provisions",
     "category": "food",
-    "amount": 1420
+    "amount": 95,
+    "currency": "CAD",
+    "confidence": 0.9215,
+    "confidence_source": "ml",
+    "needs_review": false
   }
 ]

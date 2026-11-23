@@ -970,3 +970,9 @@ body {
   .split-canvas, .split-canvas-equal { grid-template-columns: 1fr; }
   .horizon-canvas { padding: 20px; }
 }
+
+.form-select:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+  background-color: #F1F5F9;
+}

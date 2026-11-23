@@ -1,0 +1,536 @@
+text,category
+Swiggy dinner order,food
+Zomato biryani,food
+Domino's pizza medium,food
+Starbucks latte,food
+Campus canteen lunch,food
+Hostel mess monthly fee,food
+Maggi and chai at tapri,food
+Chipotle burrito bowl,food
+Trader Joe's weekly groceries,food
+McDonald's McAloo meal,food
+KFC bucket,food
+Blinkit groceries,food
+BigBasket vegetables,food
+Dining hall meal swipe,food
+Panera soup and bread,food
+Subway footlong,food
+Haldiram's snacks,food
+UPI/SWIGGY INSTAMART/8841123/OK,food
+POS 4421 COSTA COFFEE,food
+Dunkin donuts,food
+Tesco meal deal,food
+Pret a Manger sandwich,food
+Greggs sausage roll,food
+Lidl weekly shop,food
+Tim Hortons double double,food
+Uber Eats pad thai,food
+DoorDash order,food
+Burger King whopper,food
+Pizza Hut cheese burst,food
+Cafe Coffee Day cold coffee,food
+dosa at Saravana Bhavan,food
+midnight maggi,food
+D-Mart grocery shopping,food
+Zepto milk and eggs,food
+fruit and veg market,food
+boba tea,food
+ice cream parlour,food
+dinner with roommates,food
+birthday cake from bakery,food
+lunch at cafeteria,food
+Wendy's frosty,food
+Taco Bell crunchwrap,food
+Five Guys,food
+Sweetgreen salad,food
+Whole Foods,food
+Aldi shop,food
+Carrefour groceries,food
+sushi takeaway,food
+ramen with friends,food
+tiffin service monthly,food
+street food chaat,food
+vada pav,food
+Deliveroo curry,food
+Just Eat order,food
+Uber ride to campus,travel
+Ola cab airport,travel
+Rapido bike taxi,travel
+Metro card recharge,travel
+Monthly bus pass,travel
+IRCTC train ticket Pune to Mumbai,travel
+redBus ticket home,travel
+IndiGo flight Delhi,travel
+Air India web booking,travel
+Petrol for bike,travel
+Lyft to downtown,travel
+Amtrak Boston to NYC,travel
+Oyster card top up,travel
+TfL contactless,travel
+National Rail advance ticket,travel
+Eurostar London Paris,travel
+FlixBus Berlin Munich,travel
+Delta Airlines flight,travel
+Southwest flight,travel
+parking fee garage,travel
+toll plaza fastag recharge,travel
+auto rickshaw fare,travel
+Bird scooter ride,travel
+Lime e-scooter,travel
+Clipper card load,travel
+BART fare,travel
+MTA subway MetroCard,travel
+Opal card top up,travel
+Myki top up,travel
+Uber trip,travel
+taxi to railway station,travel
+local train season ticket,travel
+shuttle bus fare,travel
+Yulu bike rental,travel
+BlaBlaCar ride,travel
+ride share to airport,travel
+Bolt ride,travel
+SNCF TGV ticket,travel
+Deutsche Bahn Sparpreis,travel
+Singapore MRT EZ-Link top up,travel
+gas station fill up,travel
+Shell fuel,travel
+diesel for car,travel
+airport cab,travel
+cab to hostel,travel
+ferry ticket,travel
+Greyhound bus,travel
+weekend trip train fare,travel
+Algorithms textbook,education
+campus bookstore purchase,education
+Chegg rental,education
+Coursera subscription,education
+Udemy python course,education
+library fine,education
+exam fee semester 3,education
+lab fee,education
+course registration fee,education
+notebooks and pens,education
+stationery shop,education
+xerox and printouts,education
+photocopy of notes,education
+scientific calculator,education
+TI-84 graphing calculator,education
+Kindle book,education
+edX certificate,education
+IEEE membership,education
+hackathon registration fee,education
+drawing board and drafter,education
+Pearson eText,education
+McGraw Hill Connect access code,education
+Quizlet Plus,education
+tuition fee installment,education
+semester fee payment,education
+admission fee,education
+workshop fee,education
+conference registration,education
+journal subscription,education
+GRE exam registration,education
+IELTS fee,education
+TOEFL test fee,education
+lab coat and goggles,education
+engineering drawing sheets,education
+Linear algebra reference book,education
+Blue book exam booklets,education
+printing project report,education
+binding of thesis,education
+online course Skillshare,education
+LeetCode premium,education
+Duolingo Plus,education
+Notion education plan,education
+Overleaf subscription,education
+Springer book chapter,education
+NPTEL certification fee,education
+university transcript fee,education
+bookstore used textbooks,education
+language class fee,education
+MacBook charger,technology
+USB-C cable,technology
+wireless mouse,technology
+mechanical keyboard,technology
+Sony headphones,technology
+AirPods Pro,technology
+power bank 20000mAh,technology
+Jio recharge,technology
+Airtel postpaid bill,technology
+Vi recharge,technology
+broadband bill,technology
+WiFi router,technology
+iCloud storage,technology
+Google One,technology
+GitHub Copilot,technology
+ChatGPT Plus,technology
+screen guard for phone,technology
+HDMI adapter,technology
+external SSD 1TB,technology
+iPad stylus,technology
+Best Buy electronics,technology
+Verizon wireless bill,technology
+T-Mobile plan,technology
+Comcast internet,technology
+laptop repair,technology
+phone screen replacement,technology
+Dell monitor,technology
+webcam,technology
+USB flash drive,technology
+Raspberry Pi kit,technology
+Arduino starter kit,technology
+Samsung Galaxy case,technology
+Apple Store purchase,technology
+OnePlus buds,technology
+Logitech MX Master,technology
+Notion subscription,technology
+Adobe Creative Cloud,technology
+domain name renewal,technology
+VPN subscription,technology
+Microsoft 365,technology
+Spectrum internet,technology
+Vodafone prepaid,technology
+EE mobile contract,technology
+Amazon Kindle device,technology
+laptop sleeve,technology
+gaming mouse pad,technology
+cooling pad for laptop,technology
+phone tripod,technology
+SIM card top up,technology
+PG rent November,utilities
+hostel rent,utilities
+monthly rent transfer,utilities
+electricity bill,utilities
+water bill,utilities
+gas bill,utilities
+laundry wash and fold,utilities
+dry cleaning,utilities
+room maintenance charges,utilities
+maid salary,utilities
+cook salary,utilities
+society maintenance,utilities
+security deposit flat,utilities
+broker fee for flat,utilities
+LPG cylinder refill,utilities
+dorm fee spring,utilities
+residence hall housing payment,utilities
+council tax,utilities
+renters insurance,utilities
+PG&E energy bill,utilities
+ConEd electric bill,utilities
+heating bill,utilities
+room heater,utilities
+washing machine coins,utilities
+dryer tokens laundromat,utilities
+trash and cleaning charges,utilities
+flat rent split with roommates,utilities
+apartment rent,utilities
+student accommodation payment,utilities
+utility bill split,utilities
+water tanker,utilities
+internet and electricity bill,utilities
+monthly housing payment,utilities
+rent for December,utilities
+airbnb long stay,utilities
+pest control,utilities
+gas cylinder booking,utilities
+mess and hostel dues,utilities
+landlord payment,utilities
+electric meter recharge,utilities
+prepaid electricity recharge,utilities
+room cleaning service,utilities
+plumber charges,utilities
+AC repair,utilities
+iron and ironing service,utilities
+dormitory fee,utilities
+sublet payment,utilities
+home insurance,utilities
+Netflix subscription,entertainment
+Spotify Premium,entertainment
+Hulu monthly,entertainment
+Disney+ Hotstar,entertainment
+Apple Music,entertainment
+YouTube Premium,entertainment
+movie tickets PVR,entertainment
+INOX cinema,entertainment
+AMC theatres,entertainment
+BookMyShow concert,entertainment
+Ticketmaster show,entertainment
+StubHub tickets,entertainment
+college fest entry pass,entertainment
+Steam game purchase,entertainment
+PlayStation Plus,entertainment
+Xbox Game Pass,entertainment
+Nintendo eShop,entertainment
+bowling night,entertainment
+arcade tokens,entertainment
+billiards,entertainment
+board game cafe,entertainment
+club cover charge,entertainment
+pub night with friends,entertainment
+HBO Max,entertainment
+Amazon Prime Video,entertainment
+SonyLIV,entertainment
+Zee5 subscription,entertainment
+JioSaavn Pro,entertainment
+standup comedy show tickets,entertainment
+Twitch subscription,entertainment
+Epic Games store,entertainment
+escape room,entertainment
+karaoke night,entertainment
+amusement park tickets,entertainment
+trampoline park,entertainment
+paintball,entertainment
+mini golf,entertainment
+theatre play tickets,entertainment
+museum entry,entertainment
+festival wristband,entertainment
+Discord Nitro,entertainment
+Audible monthly,entertainment
+Crunchyroll,entertainment
+Paramount+,entertainment
+concert merch,entertainment
+go karting,entertainment
+movie night snacks and tickets,entertainment
+gaming cafe hourly,entertainment
+Apollo Pharmacy,healthcare
+1mg medicines,healthcare
+PharmEasy order,healthcare
+CVS prescription,healthcare
+Walgreens,healthcare
+Boots pharmacy,healthcare
+doctor consultation,healthcare
+campus health center copay,healthcare
+dentist cleaning,healthcare
+eye test and spectacles,healthcare
+contact lenses,healthcare
+paracetamol and cough syrup,healthcare
+vitamin supplements,healthcare
+multivitamin,healthcare
+blood test,healthcare
+lab test full body checkup,healthcare
+physiotherapy session,healthcare
+therapy session,healthcare
+counselling fee,healthcare
+urgent care visit,healthcare
+hospital bill,healthcare
+first aid kit,healthcare
+hand sanitizer,healthcare
+Crocin tablets,healthcare
+ibuprofen,healthcare
+Netmeds,healthcare
+Medplus,healthcare
+NHS prescription charge,healthcare
+optician,healthcare
+dental filling,healthcare
+vaccination,healthcare
+flu shot,healthcare
+health insurance premium,healthcare
+medical store,healthcare
+ORS and electrolytes,healthcare
+skin doctor,healthcare
+orthopedic consult,healthcare
+x-ray charges,healthcare
+ambulance,healthcare
+mental health app subscription,healthcare
+Practo appointment,healthcare
+dermatologist,healthcare
+pharmacy near hostel,healthcare
+inhaler refill,healthcare
+eye drops,healthcare
+student health plan,healthcare
+antibiotics course,healthcare
+bandages and antiseptic,healthcare
+Amazon order,shopping
+Flipkart purchase,shopping
+Myntra clothes,shopping
+Ajio order,shopping
+Zara jacket,shopping
+H&M,shopping
+Uniqlo,shopping
+Nykaa,shopping
+Meesho,shopping
+new shoes,shopping
+sneakers,shopping
+backpack,shopping
+wallet,shopping
+haircut,shopping
+barber,shopping
+salon,shopping
+perfume,shopping
+deodorant,shopping
+jeans,shopping
+t-shirts,shopping
+hoodie,shopping
+winter jacket,shopping
+sunglasses,shopping
+wristwatch,shopping
+Walmart,shopping
+Target,shopping
+Costco bulk buy,shopping
+TJ Maxx,shopping
+thrift store find,shopping
+Urban Outfitters,shopping
+Shein haul,shopping
+Lenskart sunglasses,shopping
+gift for friend birthday,shopping
+kurta for festival,shopping
+formal shirt for placement,shopping
+trimmer,shopping
+grooming kit,shopping
+Decathlon sports shoes,shopping
+slippers,shopping
+bag pack for trip,shopping
+stationery and room decor,shopping
+home decor items,shopping
+bedsheet and pillows,shopping
+umbrella,shopping
+socks and innerwear,shopping
+Primark,shopping
+ASOS order,shopping
+IKEA lamp,shopping
+Credit card EMI,emi
+laptop EMI,emi
+phone EMI installment,emi
+education loan EMI,emi
+student loan payment,emi
+Sallie Mae payment,emi
+Nelnet,emi
+Mohela payment,emi
+Bajaj Finserv EMI,emi
+loan repayment,emi
+personal loan EMI,emi
+credit card bill payment,emi
+HDFC credit card payment,emi
+SBI card bill,emi
+ICICI credit card due,emi
+Klarna installment,emi
+Afterpay payment,emi
+Affirm payment,emi
+CRED bill payment,emi
+no cost EMI iPhone,emi
+monthly installment,emi
+bike loan EMI,emi
+interest on loan,emi
+overdue interest charge,emi
+SoFi loan,emi
+Aidvantage,emi
+car loan EMI,emi
+instalment for TV,emi
+loan emi auto debit,emi
+pay later settlement,emi
+Simpl bill,emi
+LazyPay due,emi
+Slice card payment,emi
+late fee credit card,emi
+finance charge,emi
+student loan servicer payment,emi
+amex bill,emi
+loan prepayment,emi
+equated monthly installment,emi
+BNPL payment,emi
+education loan interest,emi
+credit card minimum due,emi
+consumer loan repayment,emi
+scooter finance installment,emi
+fridge EMI,emi
+mortgage payment,emi
+Tata Capital EMI,emi
+Capital One payment,emi
+Index fund SIP,investment
+Zerodha deposit,investment
+Groww mutual fund,investment
+Vanguard S&P 500 ETF,investment
+Fidelity contribution,investment
+Robinhood deposit,investment
+Charles Schwab transfer,investment
+Roth IRA contribution,investment
+401k contribution,investment
+mutual fund SIP,investment
+Wealthsimple ETF purchase,investment
+Trade Republic savings plan,investment
+Upstox,investment
+Angel One top up,investment
+fixed deposit,investment
+recurring deposit,investment
+PPF contribution,investment
+high yield savings transfer,investment
+HYSA deposit,investment
+Nifty 50 index fund,investment
+stock purchase,investment
+buying shares,investment
+gold ETF,investment
+digital gold,investment
+SGB subscription,investment
+ELSS tax saver fund,investment
+NPS contribution,investment
+savings plan monthly,investment
+emergency fund transfer,investment
+crypto purchase Coinbase,investment
+Kuvera SIP,investment
+Paytm Money,investment
+ETMoney,investment
+Vested international stocks,investment
+Acorns round-ups,investment
+ISA contribution,investment
+Moneybox deposit,investment
+Nutmeg,investment
+Freetrade,investment
+treasury bills,investment
+bond purchase,investment
+sinking fund deposit,investment
+Zerodha Coin SIP,investment
+Smallcase investment,investment
+Stashaway deposit,investment
+Syfe portfolio top up,investment
+mutual fund lumpsum,investment
+SIP auto debit,investment
+ATM cash withdrawal,miscellaneous
+paid to Rahul,miscellaneous
+UPI transfer to friend,miscellaneous
+bank charges,miscellaneous
+postage and courier,miscellaneous
+passport fee,miscellaneous
+donation to charity,miscellaneous
+unknown merchant,miscellaneous
+misc expense,miscellaneous
+cash,miscellaneous
+gift to sister,miscellaneous
+tip,miscellaneous
+notary charges,miscellaneous
+visa application fee,miscellaneous
+lost and found fee,miscellaneous
+membership dues,miscellaneous
+annual bank fee,miscellaneous
+SMS charges,miscellaneous
+money sent to home,miscellaneous
+fine for late submission,miscellaneous
+temple offering,miscellaneous
+pocket money to cousin,miscellaneous
+reimbursement,miscellaneous
+refund adjustment,miscellaneous
+forex card load,miscellaneous
+currency exchange,miscellaneous
+stamp paper,miscellaneous
+bank draft charges,miscellaneous
+club membership,miscellaneous
+charity run entry,miscellaneous
+payment to xyz,miscellaneous
+adjustment entry,miscellaneous
+wedding gift envelope,miscellaneous
+alumni association fee,miscellaneous
+random expense,miscellaneous
+wire transfer fee,miscellaneous
+cash given to roommate,miscellaneous
+emergency cash,miscellaneous
+NEFT to relative,miscellaneous
+FASTag fine,miscellaneous
+name change affidavit,miscellaneous
+photo for id card,miscellaneous
+locker rental,miscellaneous
+gift cards,miscellaneous
+flowers for friend,miscellaneous
+something else,miscellaneous
+other,miscellaneous
+paid for group dinner share to friend,miscellaneous

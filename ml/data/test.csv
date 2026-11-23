@@ -1,0 +1,271 @@
+text,category
+Behrouz Biryani,food
+Burger Singh,food
+Mad Over Donuts,food
+Nando's dinner,food
+Costco food court pizza,food
+Sainsbury's shop,food
+Eat.Fit meal box,food
+Rolls Mania kathi roll,food
+Chaayos chai,food
+mosambi juice centre,food
+late night Zomato order,food
+Kroger groceries,food
+Panda Express,food
+tea and samosa canteen,food
+Faasos wrap,food
+Haldiram,food
+veggies from Reliance Fresh,food
+POS 7781 PRET A MANGER,food
+UPI-SWIGGY-9087@ybl,food
+pizza night with the hostel gang,food
+Cafe Nero flat white,food
+Domino's,food
+McDonalds,food
+biryani,food
+morning coffee,food
+Uber,travel
+Ola Mini to Hinjewadi,travel
+Rapido,travel
+Pune metro smart card,travel
+PMPML bus pass,travel
+IRCTC,travel
+Vistara flight booking,travel
+Lufthansa ticket,travel
+petrol pump HP,travel
+FASTag recharge,travel
+Gett taxi,travel
+BlaBlaCar,travel
+NJ Transit,travel
+Caltrain monthly,travel
+cab to the airport,travel
+UPI-OLACABS-5541@paytm,travel
+train ticket for diwali,travel
+auto fare,travel
+RyanAir Dublin,travel
+KSRTC bus,travel
+parking at mall,travel
+Uber ride home,travel
+ICE train Frankfurt,travel
+bike taxi,travel
+flight to Goa,travel
+Class notes printout,education
+Cormen textbook,education
+Springer ebook,education
+college library fine,education
+GATE exam fee,education
+CAT mock tests subscription,education
+Unacademy plus,education
+stationery - pens notebooks,education
+course fee installment,education
+NPTEL exam,education
+SAT registration,education
+lab record book,education
+xerox 50 pages,education
+Coursera Plus annual,education
+Great Learning program fee,education
+tutor fee,education
+tuition class payment,education
+semester registration,education
+university exam form,education
+hackathon entry,education
+project report printing and binding,education
+Chegg study,education
+engineering graphics sheets,education
+O'Reilly learning,education
+online coding bootcamp,education
+Airtel recharge 599,technology
+Jio fiber bill,technology
+OnePlus charger,technology
+HP laptop service,technology
+Boat earphones,technology
+mechanical keyboard switches,technology
+Samsung SSD,technology
+iPhone screen guard,technology
+Dropbox plus,technology
+Cloudflare domain,technology
+Hostinger hosting,technology
+Mac mini,technology
+phone repair shop,technology
+BSNL broadband,technology
+Lenovo mouse,technology
+USB hub,technology
+Google Workspace,technology
+Anker power bank,technology
+Apple iCloud+,technology
+Netgear router,technology
+Bluetooth speaker,technology
+Cursor pro subscription,technology
+Replit core,technology
+OpenAI API credits,technology
+SIM recharge,technology
+Rent - Nov,utilities
+PG fees,utilities
+flat rent share,utilities
+BESCOM electricity,utilities
+Tata Power bill,utilities
+Mahanagar gas bill,utilities
+laundry service,utilities
+hostel mess dues,utilities
+housing fee semester,utilities
+Thames Water,utilities
+British Gas,utilities
+maintenance charges society,utilities
+drycleaner,utilities
+house help payment,utilities
+deposit for new flat,utilities
+Airbnb monthly stay,utilities
+gas refill,utilities
+hostel room rent,utilities
+NoBroker rent payment,utilities
+Con Edison,utilities
+utilities split with roommates,utilities
+apartment cleaning service,utilities
+water cooler rent,utilities
+plumbing repair,utilities
+electricity prepaid,utilities
+Netflix,entertainment
+Spotify,entertainment
+Prime Video renewal,entertainment
+Hotstar,entertainment
+movie with friends INOX,entertainment
+concert tickets,entertainment
+Steam sale,entertainment
+PS5 game,entertainment
+club entry,entertainment
+pub quiz night,entertainment
+bowling,entertainment
+gaming zone,entertainment
+Spotify Duo,entertainment
+Apple TV+,entertainment
+Peacock,entertainment
+college fest passes,entertainment
+stand up comedy night,entertainment
+Valorant skins,entertainment
+Cinepolis,entertainment
+YouTube music,entertainment
+Sunburn festival ticket,entertainment
+laser tag,entertainment
+Dice board game cafe,entertainment
+Netflix and chill snacks,entertainment
+Roblox robux,entertainment
+Apollo clinic,healthcare
+1mg order,healthcare
+doctor visit,healthcare
+dental checkup,healthcare
+specs from Lenskart eye test,healthcare
+Dolo 650,healthcare
+Vitamin D tablets,healthcare
+campus clinic,healthcare
+blood sugar test,healthcare
+Boots,healthcare
+health checkup package,healthcare
+physio,healthcare
+prescription pickup,healthcare
+Walgreens flu shot,healthcare
+Cipla medicines,healthcare
+counselor session,healthcare
+eye checkup,healthcare
+Pharmacy,healthcare
+antiseptic and band-aids,healthcare
+cough syrup,healthcare
+skin clinic consult,healthcare
+Tata 1mg lab test,healthcare
+ER copay,healthcare
+student health insurance,healthcare
+Amazon.in,shopping
+Flipkart,shopping
+Myntra,shopping
+Zara,shopping
+Nike shoes,shopping
+Adidas,shopping
+Levi's jeans,shopping
+Pantaloons,shopping
+Westside,shopping
+Max Fashion,shopping
+Lifestyle store,shopping
+haircut at salon,shopping
+Bombay Shaving Company,shopping
+Decathlon,shopping
+Lenskart,shopping
+bought a backpack,shopping
+Forever 21,shopping
+Sephora,shopping
+Etsy order,shopping
+eBay purchase,shopping
+birthday gift,shopping
+clothes shopping,shopping
+Bath and Body Works,shopping
+Skechers,shopping
+Puma store,shopping
+HDFC card payment,emi
+EMI - laptop,emi
+phone EMI,emi
+loan EMI,emi
+education loan,emi
+Navient payment,emi
+Bajaj EMI,emi
+card bill,emi
+credit card outstanding,emi
+Zest money EMI,emi
+ZestMoney,emi
+Klarna,emi
+Affirm,emi
+personal loan instalment,emi
+auto debit EMI,emi
+late payment fee card,emi
+SBI card,emi
+Axis bank card bill,emi
+student loan,emi
+OneCard payment,emi
+interest charged,emi
+TVS credit EMI,emi
+monthly instalment,emi
+Paytm postpaid bill,emi
+SIP,investment
+Groww,investment
+Zerodha,investment
+mutual fund,investment
+index fund,investment
+ETF purchase,investment
+Vanguard,investment
+stock buy,investment
+fixed deposit booking,investment
+PPF,investment
+gold bond,investment
+Robinhood,investment
+Coinbase,investment
+Kuvera,investment
+NPS,investment
+RD installment,investment
+Scripbox SIP,investment
+emergency fund,investment
+HYSA transfer,investment
+Fidelity,investment
+Nippon India mutual fund,investment
+Mirae asset SIP,investment
+Interactive Brokers deposit,investment
+savings goal transfer,investment
+buy Nifty ETF,investment
+ATM withdrawal,miscellaneous
+paid Rahul,miscellaneous
+courier,miscellaneous
+donation,miscellaneous
+misc,miscellaneous
+gift,miscellaneous
+UPI to friend,miscellaneous
+passport renewal,miscellaneous
+forex,miscellaneous
+fine,miscellaneous
+something,miscellaneous
+payment,miscellaneous
+transfer to dad,miscellaneous
+annual fee,miscellaneous
+notary,miscellaneous
+temple donation,miscellaneous
+sent money home,miscellaneous
+cash handed over,miscellaneous
+unknown,miscellaneous
+membership fee,miscellaneous
+adjustment,miscellaneous
+pocket money,miscellaneous
