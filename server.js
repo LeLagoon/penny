@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { STUDENT_LEXICON } from './lib/lexicon.js';
 import { predictByRules, normalizeText } from './lib/rules.js';
 import { createMlClient } from './lib/ml-client.js';
+import { buildDemoExpenses, buildDemoGoals, hasDemoData } from './lib/demo-data.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +18,7 @@ const USER_PROFILE_FILE = path.join(BASE_DIR, 'user_profile.json');
 const USER_LEDGER_FILE = path.join(BASE_DIR, 'user_ledger.json');
 const CUSTOM_CATEGORIES_FILE = path.join(BASE_DIR, 'custom_categories.json');
 const GOALS_CSV = path.join(BASE_DIR, 'goals.csv');
+const SEEDED_FILE = path.join(BASE_DIR, 'seeded_regions.json');
 const LEARNED_CSV = path.join(BASE_DIR, 'learned_rules.csv');
 const FEEDBACK_CSV = path.join(BASE_DIR, 'transaction_feedback.csv');
 const STUDENT_CSV = path.join(BASE_DIR, 'student.csv');
@@ -900,23 +902,48 @@ function currentRegion() {
   return getRegionForProfile(readJson(USER_PROFILE_FILE, null));
 }
 
+// Sample data for every country, added once per country so each region has something to show.
+// A country the user already has entries for is left alone, and one the user later empties
+// is not refilled (the marker file remembers which countries were handled).
+function demoFor(kind, region) {
+  if (hasDemoData(region.code)) return kind === 'expenses' ? buildDemoExpenses(region) : buildDemoGoals(region);
+  return kind === 'expenses' ? region.demoExpenses : region.demoGoals;
+}
+
+function seedMissingRegions(kind, items) {
+  const stored = readJson(SEEDED_FILE, {}) || {};
+  const done = new Set(Array.isArray(stored[kind]) ? stored[kind] : []);
+  const out = [...items];
+  let added = false;
+  for (const reg of Object.values(REGIONS)) {
+    if (done.has(reg.code)) continue;
+    done.add(reg.code);
+    if (out.some(x => x && x.currency === reg.currency)) continue;
+    let nextId = out.reduce((m, x) => Math.max(m, (x && x.id) || 0), 0) + 1;
+    for (const d of demoFor(kind, reg)) out.push({ ...d, id: nextId++, currency: reg.currency });
+    added = true;
+  }
+  if (done.size !== (Array.isArray(stored[kind]) ? stored[kind].length : 0)) {
+    writeJson(SEEDED_FILE, { ...stored, [kind]: [...done] });
+  }
+  return { items: out, added };
+}
+
 // Every expense and goal remembers the currency it was entered in, so switching region
 // never reinterprets old amounts. Older rows with no currency are tagged with the current one.
 function loadLedger() {
   const region = currentRegion();
   const stored = readJsonStrict(USER_LEDGER_FILE);
-  if (!Array.isArray(stored)) {
-    const demo = region.demoExpenses.map(e => ({ ...e, currency: region.currency }));
-    writeJson(USER_LEDGER_FILE, demo);
-    return demo;
-  }
   let changed = false;
-  const tagged = stored.map(t => {
-    if (t && !t.currency) { changed = true; return { ...t, currency: region.currency }; }
-    return t;
-  });
-  if (changed) writeJson(USER_LEDGER_FILE, tagged);
-  return tagged;
+  const tagged = Array.isArray(stored)
+    ? stored.map(t => {
+        if (t && !t.currency) { changed = true; return { ...t, currency: region.currency }; }
+        return t;
+      })
+    : [];
+  const seeded = seedMissingRegions('expenses', tagged);
+  if (!Array.isArray(stored) || changed || seeded.added) writeJson(USER_LEDGER_FILE, seeded.items);
+  return seeded.items;
 }
 
 function saveLedger(txns) {
@@ -925,26 +952,24 @@ function saveLedger(txns) {
 
 function loadGoals() {
   const region = currentRegion();
-  if (!fs.existsSync(GOALS_CSV)) {
-    const demo = region.demoGoals.map(g => ({ ...g, currency: region.currency }));
-    saveGoals(demo);
-    return demo;
-  }
   let changed = false;
-  const goals = readCsv(GOALS_CSV).map(r => {
-    if (!r.currency) changed = true;
-    return {
-      id: parseInt(r.id, 10),
-      name: r.name,
-      target_amount: parseFloat(r.target_amount || 0),
-      saved_amount: parseFloat(r.saved_amount || 0),
-      deadline: r.deadline,
-      priority: r.priority,
-      currency: r.currency || region.currency
-    };
-  });
-  if (changed) saveGoals(goals);
-  return goals;
+  const goals = fs.existsSync(GOALS_CSV)
+    ? readCsv(GOALS_CSV).map(r => {
+        if (!r.currency) changed = true;
+        return {
+          id: parseInt(r.id, 10),
+          name: r.name,
+          target_amount: parseFloat(r.target_amount || 0),
+          saved_amount: parseFloat(r.saved_amount || 0),
+          deadline: r.deadline,
+          priority: r.priority,
+          currency: r.currency || region.currency
+        };
+      })
+    : [];
+  const seeded = seedMissingRegions('goals', goals);
+  if (!fs.existsSync(GOALS_CSV) || changed || seeded.added) saveGoals(seeded.items);
+  return seeded.items;
 }
 
 function saveGoals(goals) {
@@ -1031,7 +1056,8 @@ async function handleApi(req, res, pathname, method) {
     const body = await readJsonBody(req);
     const reg = REGIONS[vRegionCode(body.country)] || currentRegion();
     const kept = loadLedger().filter(t => t.currency !== reg.currency);
-    const all = [...reg.demoExpenses.map(e => ({ ...e, currency: reg.currency })), ...kept];
+    let nextId = kept.reduce((m, t) => Math.max(m, t.id || 0), 0) + 1;
+    const all = [...demoFor('expenses', reg).map(e => ({ ...e, id: nextId++, currency: reg.currency })), ...kept];
     saveLedger(all);
     return sendJson(res, 200, { success: true, all, region: reg.code });
   }
@@ -1094,7 +1120,7 @@ async function handleApi(req, res, pathname, method) {
     const body = await readJsonBody(req);
     const reg = REGIONS[vRegionCode(body.country)] || currentRegion();
     const kept = loadGoals().filter(g => g.currency !== reg.currency);
-    const all = [...reg.demoGoals.map(g => ({ ...g, currency: reg.currency })), ...kept];
+    const all = [...demoFor('goals', reg).map(g => ({ ...g, currency: reg.currency })), ...kept];
     // keep ids unique across the combined list
     all.forEach((g, i) => { g.id = i + 1; });
     saveGoals(all);

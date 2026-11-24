@@ -190,6 +190,93 @@ function initSidebar() {
   });
 }
 
+
+// ---- Theme (light / dark) ----
+function currentTheme() {
+  return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  try { localStorage.setItem('penny_theme', theme); } catch (e) { /* storage unavailable */ }
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+}
+
+function toggleTheme() {
+  const next = currentTheme() === 'dark' ? 'light' : 'dark';
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (document.startViewTransition && !reduce) {
+    document.startViewTransition(() => applyTheme(next));
+  } else {
+    applyTheme(next);
+  }
+}
+
+// Follow the system setting until the user picks a theme themselves.
+if (window.matchMedia) {
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+    let saved = null;
+    try { saved = localStorage.getItem('penny_theme'); } catch (err) { /* ignore */ }
+    if (!saved) applyTheme(e.matches ? 'dark' : 'light');
+  });
+}
+
+// ---- Smooth number changes on the headline figures ----
+(function initNumberTween() {
+  const NUM = /^([^\d-]*)(-?[\d,]+(?:\.\d+)?)(.*)$/;
+  const reduce = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const parse = txt => { const m = NUM.exec(txt || ''); return m ? { pre: m[1], num: parseFloat(m[2].replace(/,/g, '')), dec: (m[2].split('.')[1] || '').length, post: m[3] } : null; };
+  const seen = new WeakMap();
+  function watch(el) {
+    if (seen.has(el)) return;
+    seen.set(el, el.textContent);
+    let busy = false;
+    new MutationObserver(() => {
+      if (busy) return;
+      const prev = seen.get(el);
+      const next = el.textContent;
+      if (prev === next) return;
+      seen.set(el, next);
+      const a = parse(prev), b = parse(next);
+      if (reduce() || !a || !b || a.pre !== b.pre || a.post !== b.post || a.num === b.num || !el.offsetParent) return;
+      cancelAnimationFrame(el._raf);
+      const t0 = performance.now();
+      const frame = t => {
+        const p = Math.min(1, (t - t0) / 650);
+        const v = a.num + (b.num - a.num) * (1 - Math.pow(1 - p, 4));
+        busy = true;
+        el.textContent = b.pre + v.toLocaleString(undefined, { minimumFractionDigits: b.dec, maximumFractionDigits: b.dec }) + b.post;
+        busy = false;
+        if (p < 1) el._raf = requestAnimationFrame(frame);
+        else { busy = true; el.textContent = next; busy = false; }
+      };
+      el._raf = requestAnimationFrame(frame);
+    }).observe(el, { childList: true, characterData: true, subtree: true });
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[id^="kpi-"].kpi-num, #rail-budget, #rail-income, #rail-tuition, #rail-net-inflow, #donut-center-total').forEach(watch);
+    applyTheme(currentTheme());
+  });
+})();
+
+// Cmd/Ctrl+Shift+R (hard reload) brings back the first-run setup with empty fields.
+// Saved data is not deleted; it is replaced only if the setup is completed.
+const PENNY_HARD_RESET = (() => {
+  try {
+    if (sessionStorage.getItem('penny_hard_reset')) {
+      sessionStorage.removeItem('penny_hard_reset');
+      return true;
+    }
+  } catch (e) { /* storage unavailable */ }
+  return false;
+})();
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'r') {
+    try { sessionStorage.setItem('penny_hard_reset', '1'); } catch (err) { /* ignore */ }
+  }
+});
+
 document.addEventListener('DOMContentLoaded', async () => {
   initSidebar();
 
@@ -418,6 +505,7 @@ async function loadProfile() {
       const regCode = (data.region && data.region.code) || (data.profile && data.profile.country) || 'US';
       setRegion(regCode);
       updateSidebarProfile();
+      if (PENNY_HARD_RESET) openProfileModal(true, true);
     } else {
       setRegion('US');
       openProfileModal(true);
@@ -712,8 +800,8 @@ function renderInsights() {
 
   if (anomBox) {
     anomBox.innerHTML = ins.anomalies.length
-      ? ins.anomalies.map(a => `<div style="padding:8px 10px; background:#FFF7ED; border:1px solid #FED7AA; border-radius:8px; margin-bottom:6px; font-size:12.5px;">
-          <b>${escapeHtml(a.description)}</b> · ${formatCurrency(a.amount)} <span style="color:#9A3412;">(${escapeHtml(a.reason)})</span></div>`).join('')
+      ? ins.anomalies.map(a => `<div style="padding:8px 10px; background:var(--warn-bg); border:1px solid var(--warn-border); border-radius:8px; margin-bottom:6px; font-size:12.5px;">
+          <b>${escapeHtml(a.description)}</b> · ${formatCurrency(a.amount)} <span style="color:var(--warn-text);">(${escapeHtml(a.reason)})</span></div>`).join('')
       : '<div style="font-size:12.5px; color:var(--text-muted);">No unusually large expenses recently.</div>';
   }
   if (recBox) {
@@ -781,7 +869,7 @@ function drawSpendingTrendChart() {
     line.setAttribute('y1', y);
     line.setAttribute('x2', width - padRight);
     line.setAttribute('y2', y);
-    line.setAttribute('stroke', '#F1F5F9');
+    line.setAttribute('stroke', 'var(--bg-subtle)');
     line.setAttribute('stroke-width', '1');
     svg.appendChild(line);
 
@@ -790,7 +878,7 @@ function drawSpendingTrendChart() {
     txt.setAttribute('y', y + 3);
     txt.setAttribute('text-anchor', 'end');
     txt.setAttribute('font-size', '9.5');
-    txt.setAttribute('fill', '#94A3B8');
+    txt.setAttribute('fill', 'var(--text-dim)');
     txt.textContent = formatCurrency(val, { compact: true });
     svg.appendChild(txt);
   }
@@ -815,6 +903,7 @@ function drawSpendingTrendChart() {
   const area = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   area.setAttribute('d', areaD);
   area.setAttribute('fill', 'url(#trend-gradient)');
+  area.setAttribute('class', 'chart-area');
   svg.appendChild(area);
 
   const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
@@ -836,6 +925,8 @@ function drawSpendingTrendChart() {
   sLine.setAttribute('stroke', '#0284C7');
   sLine.setAttribute('stroke-width', '2.5');
   sLine.setAttribute('stroke-linecap', 'round');
+  sLine.setAttribute('pathLength', '1');
+  sLine.setAttribute('class', 'chart-line');
   svg.appendChild(sLine);
 
   const curX = getX(currentDay);
@@ -845,7 +936,8 @@ function drawSpendingTrendChart() {
   dot.setAttribute('cy', curY);
   dot.setAttribute('r', '4.5');
   dot.setAttribute('fill', '#0284C7');
-  dot.setAttribute('stroke', '#FFFFFF');
+  dot.setAttribute('stroke', 'var(--bg-surface)');
+  dot.setAttribute('class', 'chart-dot');
   dot.setAttribute('stroke-width', '2');
   svg.appendChild(dot);
 }
@@ -874,7 +966,7 @@ function drawDonutChart(totals, totalSpent) {
     bgCircle.setAttribute('cy', cy);
     bgCircle.setAttribute('r', radius);
     bgCircle.setAttribute('fill', 'none');
-    bgCircle.setAttribute('stroke', '#E2E8F0');
+    bgCircle.setAttribute('stroke', 'var(--border-subtle)');
     bgCircle.setAttribute('stroke-width', strokeWidth);
     svg.appendChild(bgCircle);
     if (legendList) {
@@ -887,6 +979,7 @@ function drawDonutChart(totals, totalSpent) {
 
   entries.sort((a, b) => b[1] - a[1]);
 
+  let donutIdx = 0;
   entries.forEach(([cat, amt]) => {
     const pct = amt / totalSpent;
     const dashLength = pct * circumference;
@@ -904,7 +997,8 @@ function drawDonutChart(totals, totalSpent) {
     segment.setAttribute('stroke-dasharray', `${dashLength} ${circumference}`);
     segment.setAttribute('stroke-dashoffset', dashOffset);
     segment.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
-    segment.style.transition = 'all 0.5s var(--apple-spring)';
+    segment.setAttribute('class', 'donut-seg');
+    segment.style.animationDelay = `${0.08 * donutIdx++}s`;
     segment.innerHTML = `<title>${escapeHtml(name)}: ${formatCurrency(amt)} (${Math.round(pct * 100)}%)</title>`;
     svg.appendChild(segment);
 
@@ -1284,7 +1378,7 @@ function renderGoals() {
         <button class="btn-primary" style="flex:1.2; justify-content:center; font-size:11.5px; font-weight:700;" onclick="depositGoal(${g.id}, ${quickAmts[2]})">+${formatCurrency(quickAmts[2])}</button>
       </div>
 
-      <div style="display:flex; gap:6px; margin-top:8px; align-items:center; padding-top:8px; border-top:1px solid #F1F5F9;">
+      <div style="display:flex; gap:6px; margin-top:8px; align-items:center; padding-top:8px; border-top:1px solid var(--bg-subtle);">
         <div style="position:relative; flex:1;">
           <span style="position:absolute; left:8px; top:50%; transform:translateY(-50%); font-size:11px; font-weight:700; color:var(--text-muted);">${STATE.currencySymbol}</span>
           <input type="number" id="custom-dep-${g.id}" class="form-input" style="padding:4px 8px 4px 20px; font-size:11.5px; height:28px;" placeholder="Custom amount" min="0.01" step="any" onkeydown="if(event.key==='Enter'){handleCustomDeposit(${g.id});}">
@@ -1498,7 +1592,7 @@ function drawPeerBarChart() {
     line.setAttribute('y1', y);
     line.setAttribute('x2', width - padRight);
     line.setAttribute('y2', y);
-    line.setAttribute('stroke', '#F1F5F9');
+    line.setAttribute('stroke', 'var(--bg-subtle)');
     line.setAttribute('stroke-width', '1');
     svg.appendChild(line);
 
@@ -1507,7 +1601,7 @@ function drawPeerBarChart() {
     txt.setAttribute('y', y + 3.5);
     txt.setAttribute('text-anchor', 'end');
     txt.setAttribute('font-size', '10');
-    txt.setAttribute('fill', '#94A3B8');
+    txt.setAttribute('fill', 'var(--text-dim)');
     txt.setAttribute('font-family', 'Outfit, sans-serif');
     txt.textContent = formatCurrency(val, { compact: true });
     svg.appendChild(txt);
@@ -1549,7 +1643,8 @@ function drawPeerBarChart() {
     userBar.setAttribute('height', userH);
     userBar.setAttribute('rx', '4');
     userBar.setAttribute('fill', '#0284C7');
-    userBar.style.transition = 'all 0.3s var(--apple-spring)';
+    userBar.setAttribute('class', 'chart-bar');
+    userBar.style.animationDelay = `${0.05 * idx}s`;
     userBar.innerHTML = `<title>${escapeHtml(catName)}\nYour Spending: ${formatCurrency(userVal)}\nStudent Average: ${formatCurrency(peerVal)}</title>`;
     svg.appendChild(userBar);
 
@@ -1560,7 +1655,8 @@ function drawPeerBarChart() {
     peerBar.setAttribute('height', peerH);
     peerBar.setAttribute('rx', '4');
     peerBar.setAttribute('fill', '#64748B');
-    peerBar.style.transition = 'all 0.3s var(--apple-spring)';
+    peerBar.setAttribute('class', 'chart-bar');
+    peerBar.style.animationDelay = `${0.05 * idx + 0.04}s`;
     peerBar.innerHTML = `<title>${escapeHtml(catName)}\nYour Spending: ${formatCurrency(userVal)}\nStudent Average: ${formatCurrency(peerVal)}</title>`;
     svg.appendChild(peerBar);
 
@@ -1571,7 +1667,7 @@ function drawPeerBarChart() {
       pValTxt.setAttribute('text-anchor', 'middle');
       pValTxt.setAttribute('font-size', '9.5');
       pValTxt.setAttribute('font-weight', '600');
-      pValTxt.setAttribute('fill', '#64748B');
+      pValTxt.setAttribute('fill', 'var(--text-muted)');
       pValTxt.textContent = formatCurrency(peerVal, { compact: true });
       svg.appendChild(pValTxt);
     }
@@ -1594,7 +1690,7 @@ function drawPeerBarChart() {
     labelTxt.setAttribute('text-anchor', 'middle');
     labelTxt.setAttribute('font-size', '11');
     labelTxt.setAttribute('font-weight', '600');
-    labelTxt.setAttribute('fill', '#475569');
+    labelTxt.setAttribute('fill', 'var(--text-body)');
     labelTxt.setAttribute('font-family', 'Outfit, sans-serif');
     const shortLabel = catName.split('&')[0].trim();
     labelTxt.textContent = shortLabel;
@@ -1621,11 +1717,11 @@ function renderStudio() {
   if (retrainBtn) retrainBtn.disabled = ml.status !== 'ready';
 
   if (ml.status === 'ready' && m) {
-    banner.style.cssText += ';background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;';
+    banner.style.cssText += ';background:var(--ok-bg);border:1px solid var(--ok-border);color:var(--ok-text);';
     banner.innerHTML = `<b>Machine-learning model is running.</b> Last trained ${escapeHtml(new Date(m.trained_at).toLocaleString())}. ` +
       `Everything below was measured on ${m.dataset.holdout_test_examples} held-out example phrases the model never saw while training.`;
   } else {
-    banner.style.cssText += ';background:#FFF7ED;border:1px solid #FED7AA;color:#9A3412;';
+    banner.style.cssText += ';background:var(--warn-bg);border:1px solid var(--warn-border);color:var(--warn-text);';
     const why = ml.status === 'starting' ? 'The ML service is still starting up (the first start trains the model and takes a few seconds). Refresh shortly.'
       : ml.status === 'off' ? 'The ML service is switched off (PENNY_ML=off), so Penny is using its keyword rules.'
       : `The ML service is not running (${escapeHtml(ml.error || 'unknown reason')}). Penny is using its keyword rules instead. Install the Python packages with <code>pip install -r requirements.txt</code> and restart.`;
@@ -1669,7 +1765,7 @@ function renderStudio() {
       return `<tr>
         <td style="padding-left:20px; font-weight:600;">${escapeHtml(CAT_NAMES[cat] || cat)}</td>
         <td>${pct(r.precision, 0)}</td><td>${pct(r.recall, 0)}</td>
-        <td style="font-weight:700; color:${r.f1 >= 0.85 ? 'var(--emerald)' : r.f1 >= 0.75 ? 'var(--text-main)' : '#C2410C'};">${r.f1.toFixed(2)}</td>
+        <td style="font-weight:700; color:${r.f1 >= 0.85 ? 'var(--emerald)' : r.f1 >= 0.75 ? 'var(--text-main)' : 'var(--warn-text)'};">${r.f1.toFixed(2)}</td>
         <td style="color:var(--text-muted);">${base ? base.f1.toFixed(2) : '—'} ${gain > 0.02 ? '<span style="color:var(--emerald); font-size:11px;">(+' + gain.toFixed(2) + ')</span>' : ''}</td>
         <td style="padding-right:20px; text-align:right; color:var(--text-muted);">${r.support}</td></tr>`;
     }).join('');
@@ -1679,7 +1775,7 @@ function renderStudio() {
   if (thr) {
     thr.innerHTML = `<table class="data-table" style="width:100%; font-size:12.5px;"><thead><tr><th>Confidence at least</th><th>Expenses auto-labelled</th><th>Of those, correct</th></tr></thead><tbody>` +
       m.confidence_thresholds.filter(t => [0, 0.5, 0.7, 0.9].includes(t.threshold)).map(t => {
-        const mark = Math.abs(t.threshold - m.review_threshold) < 0.001 ? ' style="background:#EFF6FF; font-weight:700;"' : '';
+        const mark = Math.abs(t.threshold - m.review_threshold) < 0.001 ? ' style="background:var(--tint-blue); font-weight:700;"' : '';
         return `<tr${mark}><td>${pct(t.threshold, 0)}</td><td>${pct(t.coverage, 0)}</td><td>${pct(t.accuracy_when_accepted, 1)}</td></tr>`;
       }).join('') + `</tbody></table>
       <div style="font-size:11.5px; color:var(--text-muted); margin-top:6px;">Highlighted: the ${pct(m.review_threshold, 0)} cut-off below which Penny asks you to double-check.</div>`;
@@ -1785,32 +1881,31 @@ function handleScratchPredict(val) {
   }, 160);
 }
 
-function openProfileModal(isForced = false) {
+function openProfileModal(isForced = false, blank = false) {
   const backdrop = document.getElementById('onboarding-modal-backdrop');
   const dialog = document.getElementById('onboarding-modal');
-  const closeBtn = document.getElementById('ob-close-btn');
-  const cancelBtn = document.getElementById('ob-cancel-btn');
   const titleEl = document.getElementById('ob-modal-title');
   const subEl = document.getElementById('ob-modal-sub');
   const submitBtn = document.getElementById('ob-submit-btn');
 
-  if (isForced) {
-    if (closeBtn) closeBtn.style.display = 'none';
-    if (cancelBtn) cancelBtn.style.display = 'none';
+  obSetup = !!isForced;
+  dialog.classList.toggle('mode-setup', obSetup);
+  dialog.classList.toggle('mode-edit', !obSetup);
+  if (obSetup) {
     if (titleEl) titleEl.textContent = 'Welcome to Penny';
     if (subEl) subEl.textContent = 'Set up your college, tuition fees, and monthly allowance to get your personalized budget.';
     if (submitBtn) submitBtn.textContent = 'Save Profile & Get Started';
     backdrop.onclick = null;
   } else {
-    if (closeBtn) closeBtn.style.display = 'block';
-    if (cancelBtn) cancelBtn.style.display = 'inline-flex';
     if (titleEl) titleEl.textContent = 'Edit Student Details';
     if (subEl) subEl.textContent = 'Update your college, tuition, or monthly allowance.';
     if (submitBtn) submitBtn.textContent = 'Save Changes';
     backdrop.onclick = closeProfileModal;
   }
+  obStep = 0;
+  obMax = 0;
 
-  if (STATE.profile) {
+  if (STATE.profile && !blank) {
     const regCode = STATE.profile.country || (STATE.currentRegion && STATE.currentRegion.code) || 'US';
     const obRegion = document.getElementById('ob-region');
     if (obRegion) obRegion.value = regCode;
@@ -1837,6 +1932,9 @@ function openProfileModal(isForced = false) {
     if (obRegion) obRegion.value = regCode;
     filterCollegeDropdownByRegion(regCode);
 
+    ['ob-name', 'ob-custom-college', 'ob-tuition', 'ob-income', 'ob-aid'].forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('ob-age').value = 21;
+    document.getElementById('custom-college-row').style.display = 'none';
     document.getElementById('ob-college').selectedIndex = 0;
     document.getElementById('ob-city').selectedIndex = 0;
     document.getElementById('ob-major').selectedIndex = 0;
@@ -1850,11 +1948,20 @@ function openProfileModal(isForced = false) {
   backdrop.style.display = 'block';
   dialog.style.display = 'block';
   dialog.scrollTop = 0;
+  const obShell = dialog.querySelector('.ob-shell');
+  if (obShell) obShell.scrollTop = 0;
   document.body.style.overflow = 'hidden';
+  obRenderSteps(0);
+  obRefreshSummary(false);
   setTimeout(() => {
     backdrop.style.opacity = '1';
     dialog.style.opacity = '1';
     dialog.style.transform = 'translate(-50%, -50%) scale(1)';
+    dialog.classList.remove('is-open');
+    void dialog.offsetWidth;
+    dialog.classList.add('is-open');
+    ['ob-sum-tuition', 'ob-sum-inflow', 'ob-sum-left'].forEach(id => { document.getElementById(id).dataset.v = 0; });
+    obRefreshSummary(true);
   }, 10);
 }
 
@@ -1868,8 +1975,152 @@ function closeProfileModal() {
   setTimeout(() => {
     backdrop.style.display = 'none';
     dialog.style.display = 'none';
+    dialog.classList.remove('is-open');
   }, 240);
 }
+
+// ---- Student details modal: first-run steps + edit side panel ----
+let obStep = 0;
+let obMax = 0;
+let obSetup = false;
+
+function obRenderSteps(dir) {
+  const dlg = document.getElementById('onboarding-modal');
+  const secs = [...dlg.querySelectorAll('.ob-sec')];
+  const btns = [...dlg.querySelectorAll('#ob-steps button')];
+  const cancel = document.getElementById('ob-cancel-btn');
+  const next = document.getElementById('ob-next-btn');
+  const submit = document.getElementById('ob-submit-btn');
+  btns.forEach((b, i) => {
+    b.classList.toggle('on', i === obStep);
+    b.classList.toggle('done', i < obStep);
+    b.classList.toggle('reach', obSetup && i <= obMax);
+  });
+  if (!obSetup) {
+    secs.forEach(s => s.classList.add('on'));
+    cancel.textContent = 'Cancel';
+    cancel.classList.remove('ghost');
+    next.hidden = true;
+    submit.hidden = false;
+    return;
+  }
+  secs.forEach((s, i) => {
+    const on = i === obStep;
+    s.classList.toggle('on', on);
+    s.classList.remove('enter-fwd', 'enter-back', 'shake');
+    if (on && dir) {
+      void s.offsetWidth;
+      s.classList.add(dir > 0 ? 'enter-fwd' : 'enter-back');
+    }
+  });
+  cancel.textContent = 'Back';
+  cancel.classList.toggle('ghost', obStep === 0);
+  next.hidden = obStep === 3;
+  submit.hidden = obStep !== 3;
+}
+
+function obValidateStep(i) {
+  const sec = document.querySelector(`#onboarding-modal .ob-sec[data-step="${i}"]`);
+  for (const el of sec.querySelectorAll('input, select')) {
+    if (!el.checkValidity()) {
+      sec.classList.remove('enter-fwd', 'enter-back', 'shake');
+      void sec.offsetWidth;
+      sec.classList.add('shake');
+      el.reportValidity();
+      return false;
+    }
+  }
+  return true;
+}
+
+function obGoTo(i) {
+  if (i === obStep) return;
+  const dir = i > obStep ? 1 : -1;
+  obStep = i;
+  obMax = Math.max(obMax, obStep);
+  obRenderSteps(dir);
+  const first = document.querySelector(`#onboarding-modal .ob-sec[data-step="${i}"] input:not([disabled]), #onboarding-modal .ob-sec[data-step="${i}"] select:not([disabled])`);
+  if (first) setTimeout(() => first.focus({ preventScroll: true }), 120);
+}
+
+function obNext() {
+  if (obStep < 3 && obValidateStep(obStep)) obGoTo(obStep + 1);
+}
+
+function obBackOrCancel() {
+  if (!obSetup) return closeProfileModal();
+  if (obStep > 0) obGoTo(obStep - 1);
+}
+
+function obHandleSubmit(e) {
+  if (obSetup && obStep < 3) {
+    e.preventDefault();
+    obNext();
+    return;
+  }
+  return handleProfileSubmit(e);
+}
+
+function obTween(el, to, animate) {
+  const from = animate ? (parseFloat(el.dataset.v) || 0) : to;
+  el.dataset.v = to;
+  cancelAnimationFrame(el._raf);
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!animate || reduce || from === to) {
+    el.textContent = formatCurrency(to);
+    return;
+  }
+  const t0 = performance.now();
+  const step = t => {
+    const p = Math.min(1, (t - t0) / 450);
+    el.textContent = formatCurrency(from + (to - from) * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) el._raf = requestAnimationFrame(step);
+  };
+  el._raf = requestAnimationFrame(step);
+}
+
+function obRefreshSummary(animate = true) {
+  const g = id => document.getElementById(id);
+  if (!g('ob-sum-name')) return;
+  const name = g('ob-name').value.trim();
+  const av = g('ob-avatar');
+  const initial = (name[0] || 'S').toUpperCase();
+  if (av.textContent !== initial) {
+    av.textContent = initial;
+    if (animate) {
+      av.classList.remove('pop');
+      void av.offsetWidth;
+      av.classList.add('pop');
+    }
+  }
+  g('ob-sum-name').textContent = name || 'Your name';
+  g('ob-sum-sub').textContent = [g('ob-year').value, g('ob-major').value].filter(Boolean).join(' · ') || 'Major · Year';
+  const col = g('ob-college').value;
+  g('ob-sum-college').textContent = !col ? 'Choose a college'
+    : (col.startsWith('Other') ? (g('ob-custom-college').value.trim() || col) : col);
+
+  const tuition = parseFloat(g('ob-tuition').value) || 0;
+  const monthly = STATE.tuitionPeriod === 'semester' ? Math.round(tuition / 6) : Math.round(tuition / 12);
+  const inflow = (parseFloat(g('ob-income').value) || 0) + (parseFloat(g('ob-aid').value) || 0);
+  const left = inflow - monthly;
+  obTween(g('ob-sum-tuition'), monthly, animate);
+  obTween(g('ob-sum-inflow'), inflow, animate);
+  const leftEl = g('ob-sum-left');
+  obTween(leftEl, left, animate);
+  leftEl.classList.toggle('pos', left >= 0);
+  leftEl.classList.toggle('neg', left < 0);
+}
+
+['input', 'change'].forEach(evt => document.addEventListener(evt, e => {
+  if (e.target.closest && e.target.closest('#ob-form')) obRefreshSummary(true);
+}));
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('#ob-steps button');
+  if (b && obSetup) {
+    const i = Number(b.dataset.step);
+    if (i <= obMax) obGoTo(i);
+  }
+});
 
 function setTuitionPeriod(period) {
   STATE.tuitionPeriod = period;
@@ -1893,6 +2144,7 @@ function updateTuitionAmortizationPreview(val) {
   const monthly = STATE.tuitionPeriod === 'semester' ? Math.round(amt / 6) : Math.round(amt / 12);
   const preview = document.getElementById('ob-tuition-amort-preview');
   if (preview) preview.textContent = `${formatCurrency(monthly)} / month amortized`;
+  if (typeof obRefreshSummary === 'function') obRefreshSummary(true);
 }
 
 function filterCollegeDropdownByRegion(regionCode) {
@@ -1937,6 +2189,7 @@ function handleModalRegionChange(regionCode) {
       aidInp.value = reg.sampleAid;
     }
   }
+  obRefreshSummary(true);
 }
 
 // A known college fixes the campus location: show its city and lock the city dropdown.
