@@ -25,6 +25,56 @@
 </head>
 <body>
 
+  <div id="penny-loader" role="status" aria-live="polite" aria-label="Loading">
+    <div class="pl-bar"><i id="pl-fill"></i></div>
+    <div class="pl-stage">
+      <svg class="pl-spin" viewBox="0 0 40 40" aria-hidden="true"><circle class="pl-track" cx="20" cy="20" r="16"/><circle class="pl-arc" cx="20" cy="20" r="16"/></svg>
+      <div class="pl-msg" id="pl-msg">Loading</div>
+    </div>
+  </div>
+  <script>
+    // Splash screen: shows at once, tracks the first data load, then fades away.
+    (function () {
+      var started = Date.now();
+      var MIN_MS = 1100;
+      var loader = document.getElementById('penny-loader');
+      var fill = document.getElementById('pl-fill');
+      var msg = document.getElementById('pl-msg');
+      var note = document.getElementById('pl-note');
+      var stepP = 0, creep = 0, total = 7, finished = false, lastMsg = 'Loading';
+      function paint() { if (fill) fill.style.width = (Math.max(stepP, creep) * 100).toFixed(1) + '%'; }
+      var timer = setInterval(function () { creep += (0.9 - creep) * 0.04; paint(); }, 220);
+      var noteTimer = setTimeout(function () { if (note) note.classList.add('show'); }, 6000);
+      var hardStop = setTimeout(function () { window.pennyLoader.done(); }, 45000);
+      window.pennyLoader = {
+        step: function (n, label) {
+          if (finished) return;
+          stepP = Math.min(n / total, 1);
+          if (label && msg && label !== lastMsg) {
+            lastMsg = label;
+            msg.classList.add('swap');
+            setTimeout(function () { msg.textContent = label; msg.classList.remove('swap'); }, 180);
+          }
+          paint();
+        },
+        done: function () {
+          if (finished) return;
+          finished = true;
+          clearInterval(timer); clearTimeout(noteTimer); clearTimeout(hardStop);
+          var wait = Math.max(0, MIN_MS - (Date.now() - started));
+          setTimeout(function () {
+            if (fill) fill.style.width = '100%';
+            if (msg) msg.textContent = 'Ready';
+            setTimeout(function () {
+              loader.classList.add('done');
+              setTimeout(function () { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 700);
+            }, 350);
+          }, wait);
+        }
+      };
+    })();
+  </script>
+
   <div class="app-layout">
 
     <aside class="command-rail">

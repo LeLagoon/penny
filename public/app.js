@@ -336,16 +336,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     gmDate.value = future.toISOString().split('T')[0];
   }
 
-  await loadCategories();
-  await loadMetadata();
-  await loadProfile();
-  await loadTransactions();
-  await loadGoals();
-  await loadPeerBenchmarks();
-  await loadDiagnostics();
+  const L = window.pennyLoader || { step() {}, done() {} };
+  try {
+    L.step(0, 'Loading');
+    await loadCategories();
+    L.step(1, 'Loading');
+    await loadMetadata();
+    L.step(2, 'Loading');
+    await loadProfile();
+    L.step(3, 'Loading');
+    await loadTransactions();
+    L.step(4, 'Loading');
+    await loadGoals();
+    L.step(5, 'Loading');
+    await loadPeerBenchmarks();
+    L.step(6, 'Loading');
+    await loadDiagnostics();
 
-  renderAll();
-  switchView('overview');
+    renderAll();
+    switchView('overview');
+  } finally {
+    L.done();
+  }
 
   window.addEventListener('resize', () => {
     if (STATE.activeView === 'overview') drawSpendingTrendChart();

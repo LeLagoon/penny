@@ -1,15 +1,15 @@
 {
-  "name": "shyamak rajesh",
-  "college": "Imperial College London",
-  "campus_city": "London",
+  "name": "234252",
+  "college": "University of Cambridge",
+  "campus_city": "Cambridge",
   "country": "GB",
-  "major": "Computer Science",
-  "year_in_school": "Freshman",
-  "tuition_amount": 20000,
+  "major": "Biology",
+  "year_in_school": "Junior",
+  "tuition_amount": 24242,
   "tuition_period": "annual",
-  "monthly_income": 3333,
-  "financial_aid": 223,
-  "age": 30,
+  "monthly_income": 2414,
+  "financial_aid": 21,
+  "age": 21,
   "gender": "Male",
-  "preferred_payment_method": "Credit/Debit Card"
+  "preferred_payment_method": "Mobile Payment App"
 }

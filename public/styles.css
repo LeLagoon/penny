@@ -1278,3 +1278,24 @@ body, .lumi-box, .profile-capsule, .form-input, .form-select, .nav-item, .btn-se
 .tour-skip:hover { color: var(--text-main); }
 .tour-actions .btn-primary, .tour-actions .btn-secondary { padding: 7px 14px; font-size: 12.5px; }
 @media (max-width: 520px) { .tour-actions .tour-skip { display: none; } }
+
+/* ================= Loading screen ================= */
+#penny-loader { position: fixed; inset: 0; z-index: 200000; background: var(--bg-base); display: flex; align-items: center; justify-content: center; transition: opacity .6s var(--ease-out), visibility 0s linear .6s; }
+#penny-loader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+.pl-stage { display: flex; flex-direction: column; align-items: center; gap: 18px; animation: plIn .7s var(--ease-out) backwards; transition: transform .6s var(--ease-out), opacity .45s ease; }
+#penny-loader.done .pl-stage { opacity: 0; transform: translateY(-6px); }
+@keyframes plIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.pl-spin { width: 34px; height: 34px; animation: plSpin 1.4s linear infinite; }
+.pl-spin circle { fill: none; stroke-width: 2.5; }
+.pl-track { stroke: var(--border-subtle); }
+.pl-arc { stroke: var(--blue-primary); stroke-linecap: round; stroke-dasharray: 26 100; animation: plArc 1.9s var(--ease-inout) infinite; }
+@keyframes plSpin { to { transform: rotate(360deg); } }
+@keyframes plArc { 0% { stroke-dasharray: 6 100; stroke-dashoffset: 0; } 50% { stroke-dasharray: 52 100; stroke-dashoffset: -14; } 100% { stroke-dasharray: 6 100; stroke-dashoffset: -100; } }
+
+.pl-msg { font-size: 13px; font-weight: 500; letter-spacing: .01em; color: var(--text-muted); min-height: 20px; transition: opacity .18s ease, transform .18s ease; }
+.pl-msg.swap { opacity: 0; transform: translateY(4px); }
+.pl-bar { position: absolute; top: 0; left: 0; right: 0; height: 2px; background: transparent; }
+.pl-bar i { display: block; height: 100%; width: 0; background: var(--blue-primary); transition: width .6s var(--ease-out); }
+.pl-note { position: absolute; bottom: 32px; left: 0; right: 0; padding: 0 24px; font-size: 12px; line-height: 1.5; color: var(--text-dim); text-align: center; opacity: 0; transform: translateY(4px); transition: opacity .6s ease, transform .6s ease; }
+.pl-note.show { opacity: 1; transform: none; }
