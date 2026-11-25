@@ -1,15 +1,15 @@
 {
-  "name": "shyamak seth",
-  "college": "University of Oxford",
-  "campus_city": "Oxford",
+  "name": "shyamak rajesh",
+  "college": "Imperial College London",
+  "campus_city": "London",
   "country": "GB",
   "major": "Computer Science",
-  "year_in_school": "Senior",
-  "tuition_amount": 9000,
-  "tuition_period": "semester",
-  "monthly_income": 2100,
-  "financial_aid": 750,
+  "year_in_school": "Freshman",
+  "tuition_amount": 20000,
+  "tuition_period": "annual",
+  "monthly_income": 3333,
+  "financial_aid": 223,
   "age": 30,
-  "gender": "Non-binary",
-  "preferred_payment_method": "Mobile Payment App"
+  "gender": "Male",
+  "preferred_payment_method": "Credit/Debit Card"
 }

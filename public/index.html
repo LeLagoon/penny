@@ -138,6 +138,8 @@
           College expenses add up quickly. Try putting about 15% of your allowance aside for surprise costs and emergencies.
         </p>
       </div>
+
+      <button type="button" class="tour-link" onclick="startTour()">Take the tour</button>
     </aside>
 
     <main class="horizon-canvas">
@@ -154,7 +156,6 @@
 
         <div style="display:flex; align-items:center; gap:14px;">
           <div style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--text-muted);">
-            <span class="status-indicator-live"></span>
             <span>Local Rates Active</span>
           </div>
           <span class="badge badge-blue" id="canvas-active-currency-badge" style="font-size:11px; padding:3px 8px;">USD $</span>
@@ -958,5 +959,6 @@
   <div id="toast">Notification text</div>
 
   <script src="/app.js"></script>
+  <script src="/tour.js"></script>
 </body>
 </html>

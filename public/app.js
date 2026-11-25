@@ -223,41 +223,85 @@ if (window.matchMedia) {
 }
 
 // ---- Smooth number changes on the headline figures ----
+// Every figure always settles on the exact text the page rendered: the count-up only ever
+// shows in-between values for a moment, and a timer forces the final text even if animation
+// frames are paused (background tab) or another render arrives mid-way. Changing currency,
+// or anything that is not the same kind of number, swaps instantly with no tween.
 (function initNumberTween() {
   const NUM = /^([^\d-]*)(-?[\d,]+(?:\.\d+)?)(.*)$/;
+  const DURATION = 600;
   const reduce = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const parse = txt => { const m = NUM.exec(txt || ''); return m ? { pre: m[1], num: parseFloat(m[2].replace(/,/g, '')), dec: (m[2].split('.')[1] || '').length, post: m[3] } : null; };
-  const seen = new WeakMap();
+  const parse = txt => {
+    const m = NUM.exec(txt || '');
+    return m ? { pre: m[1], num: parseFloat(m[2].replace(/,/g, '')), dec: (m[2].split('.')[1] || '').length, post: m[3] } : null;
+  };
+
   function watch(el) {
-    if (seen.has(el)) return;
-    seen.set(el, el.textContent);
-    let busy = false;
-    new MutationObserver(() => {
-      if (busy) return;
-      const prev = seen.get(el);
+    if (el._tw) return;
+    const st = (el._tw = { shown: el.textContent, final: el.textContent, raf: 0, timer: 0 });
+    const obs = new MutationObserver(onMutate);
+
+    function put(text) {
+      st.shown = text;
+      if (el.textContent !== text) el.textContent = text;
+      obs.takeRecords(); // our own write must not look like a new render
+    }
+    function settle(text) {
+      cancelAnimationFrame(st.raf);
+      clearTimeout(st.timer);
+      st.final = text;
+      put(text);
+    }
+    function onMutate() {
       const next = el.textContent;
-      if (prev === next) return;
-      seen.set(el, next);
-      const a = parse(prev), b = parse(next);
-      if (reduce() || !a || !b || a.pre !== b.pre || a.post !== b.post || a.num === b.num || !el.offsetParent) return;
-      cancelAnimationFrame(el._raf);
+      if (next === st.shown) return;
+      const from = parse(st.shown);
+      const to = parse(next);
+      cancelAnimationFrame(st.raf);
+      clearTimeout(st.timer);
+      st.final = next;
+      if (reduce() || !from || !to || from.pre !== to.pre || from.post !== to.post || from.num === to.num || !el.offsetParent) {
+        put(next);
+        return;
+      }
       const t0 = performance.now();
+      const start = from.num;
       const frame = t => {
-        const p = Math.min(1, (t - t0) / 650);
-        const v = a.num + (b.num - a.num) * (1 - Math.pow(1 - p, 4));
-        busy = true;
-        el.textContent = b.pre + v.toLocaleString(undefined, { minimumFractionDigits: b.dec, maximumFractionDigits: b.dec }) + b.post;
-        busy = false;
-        if (p < 1) el._raf = requestAnimationFrame(frame);
-        else { busy = true; el.textContent = next; busy = false; }
+        const p = Math.min(1, (t - t0) / DURATION);
+        const v = start + (to.num - start) * (1 - Math.pow(1 - p, 3));
+        if (p < 1) {
+          put(to.pre + v.toLocaleString(undefined, { minimumFractionDigits: to.dec, maximumFractionDigits: to.dec }) + to.post);
+          st.raf = requestAnimationFrame(frame);
+        } else {
+          settle(next);
+        }
       };
-      el._raf = requestAnimationFrame(frame);
-    }).observe(el, { childList: true, characterData: true, subtree: true });
+      put(to.pre + start.toLocaleString(undefined, { minimumFractionDigits: to.dec, maximumFractionDigits: to.dec }) + to.post);
+      st.raf = requestAnimationFrame(frame);
+      st.timer = setTimeout(() => settle(next), DURATION + 150); // always finish on the real value
+    }
+    obs.observe(el, { childList: true, characterData: true, subtree: true });
+    // Process a render that the observer has not reported yet (callbacks arrive asynchronously).
+    st.sync = () => { if (obs.takeRecords().length) onMutate(); };
   }
+
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[id^="kpi-"].kpi-num, #rail-budget, #rail-income, #rail-tuition, #rail-net-inflow, #donut-center-total').forEach(watch);
     applyTheme(currentTheme());
   });
+
+  // Anything still mid-count is forced to its final text (used after a currency switch).
+  window.settleNumbers = () => {
+    document.querySelectorAll('[id^="kpi-"].kpi-num, #rail-budget, #rail-income, #rail-tuition, #rail-net-inflow, #donut-center-total').forEach(el => {
+      if (el._tw) {
+        el._tw.sync();
+        cancelAnimationFrame(el._tw.raf);
+        clearTimeout(el._tw.timer);
+        if (el.textContent !== el._tw.final) el.textContent = el._tw.final;
+        el._tw.shown = el.textContent;
+      }
+    });
+  };
 })();
 
 // Cmd/Ctrl+Shift+R (hard reload) brings back the first-run setup with empty fields.
@@ -387,6 +431,7 @@ async function handleRegionSwitch(regionCode) {
     await loadDiagnostics();
 
     renderAll();
+    if (window.settleNumbers) window.settleNumbers();
 
     const hiddenTxns = (STATE.allTransactions || []).length - STATE.transactions.length;
     const hiddenGoals = (STATE.allGoals || []).length - STATE.goals.length;
@@ -2065,18 +2110,21 @@ function obTween(el, to, animate) {
   const from = animate ? (parseFloat(el.dataset.v) || 0) : to;
   el.dataset.v = to;
   cancelAnimationFrame(el._raf);
+  clearTimeout(el._timer);
   const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!animate || reduce || from === to) {
     el.textContent = formatCurrency(to);
     return;
   }
   const t0 = performance.now();
+  clearTimeout(el._timer);
   const step = t => {
     const p = Math.min(1, (t - t0) / 450);
     el.textContent = formatCurrency(from + (to - from) * (1 - Math.pow(1 - p, 3)));
     if (p < 1) el._raf = requestAnimationFrame(step);
   };
   el._raf = requestAnimationFrame(step);
+  el._timer = setTimeout(() => { cancelAnimationFrame(el._raf); el.textContent = formatCurrency(to); }, 600);
 }
 
 function obRefreshSummary(animate = true) {
@@ -2230,6 +2278,7 @@ function handleCollegeChange(val) {
 
 async function handleProfileSubmit(e) {
   e.preventDefault();
+  const wasSetup = obSetup;
   let college = document.getElementById('ob-college').value;
   if (college === 'Other / Independent Institution') {
     const customCollege = document.getElementById('ob-custom-college').value.trim();
@@ -2286,6 +2335,7 @@ async function handleProfileSubmit(e) {
     switchView('overview');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     showToast(`Profile saved for ${college} (${city})!`);
+    if (wasSetup && window.maybeStartTour) setTimeout(window.maybeStartTour, 900);
   } catch (err) {
     console.error('Failed to save profile:', err);
     showToast(err.message || 'Something went wrong.');
