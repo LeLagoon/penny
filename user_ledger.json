@@ -116,8 +116,8 @@
     "category": "food",
     "amount": 12,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -127,8 +127,8 @@
     "category": "food",
     "amount": 14,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -138,8 +138,8 @@
     "category": "food",
     "amount": 14,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -149,8 +149,8 @@
     "category": "food",
     "amount": 11,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -160,8 +160,8 @@
     "category": "technology",
     "amount": 44,
     "currency": "USD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.8952,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -171,8 +171,8 @@
     "category": "food",
     "amount": 14,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -182,8 +182,8 @@
     "category": "travel",
     "amount": 65,
     "currency": "USD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.8595,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -193,8 +193,8 @@
     "category": "food",
     "amount": 11,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -204,8 +204,8 @@
     "category": "food",
     "amount": 12,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -215,8 +215,8 @@
     "category": "education",
     "amount": 70,
     "currency": "USD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9586,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -226,8 +226,8 @@
     "category": "entertainment",
     "amount": 11,
     "currency": "USD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -237,8 +237,8 @@
     "category": "food",
     "amount": 12,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -248,8 +248,8 @@
     "category": "food",
     "amount": 13,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -259,8 +259,8 @@
     "category": "food",
     "amount": 67,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9886,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -270,8 +270,8 @@
     "category": "emi",
     "amount": 110,
     "currency": "USD",
-    "confidence": 0.8,
-    "confidence_source": "rules",
+    "confidence": 0.9996,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -281,8 +281,8 @@
     "category": "food",
     "amount": 45,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9886,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -292,8 +292,8 @@
     "category": "food",
     "amount": 13,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -303,8 +303,8 @@
     "category": "investment",
     "amount": 100,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9942,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -314,8 +314,8 @@
     "category": "entertainment",
     "amount": 27,
     "currency": "USD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9936,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -325,9 +325,9 @@
     "category": "utilities",
     "amount": 45,
     "currency": "USD",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.6558,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 31,
@@ -336,8 +336,8 @@
     "category": "entertainment",
     "amount": 33,
     "currency": "USD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9936,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -347,8 +347,8 @@
     "category": "education",
     "amount": 26,
     "currency": "USD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9965,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -358,8 +358,8 @@
     "category": "food",
     "amount": 11,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -369,8 +369,8 @@
     "category": "food",
     "amount": 61,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9886,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -380,8 +380,8 @@
     "category": "travel",
     "amount": 65,
     "currency": "USD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.8595,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -391,8 +391,8 @@
     "category": "healthcare",
     "amount": 26,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9997,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -402,8 +402,8 @@
     "category": "food",
     "amount": 13,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -413,8 +413,8 @@
     "category": "healthcare",
     "amount": 23,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9997,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -424,8 +424,8 @@
     "category": "food",
     "amount": 13,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -435,8 +435,8 @@
     "category": "entertainment",
     "amount": 11,
     "currency": "USD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -446,8 +446,8 @@
     "category": "food",
     "amount": 15,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -457,8 +457,8 @@
     "category": "emi",
     "amount": 110,
     "currency": "USD",
-    "confidence": 0.8,
-    "confidence_source": "rules",
+    "confidence": 0.9996,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -468,8 +468,8 @@
     "category": "food",
     "amount": 66,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9886,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -479,8 +479,8 @@
     "category": "food",
     "amount": 11,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -490,8 +490,8 @@
     "category": "food",
     "amount": 28,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9917,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -512,8 +512,8 @@
     "category": "food",
     "amount": 11,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -523,8 +523,8 @@
     "category": "healthcare",
     "amount": 21,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9997,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -534,8 +534,8 @@
     "category": "investment",
     "amount": 100,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9942,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -545,9 +545,9 @@
     "category": "utilities",
     "amount": 45,
     "currency": "USD",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.6558,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 51,
@@ -556,8 +556,8 @@
     "category": "entertainment",
     "amount": 32,
     "currency": "USD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9936,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -567,8 +567,8 @@
     "category": "food",
     "amount": 54,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9886,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -578,8 +578,8 @@
     "category": "education",
     "amount": 27,
     "currency": "USD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9965,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -589,8 +589,8 @@
     "category": "education",
     "amount": 23,
     "currency": "USD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9965,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -600,8 +600,8 @@
     "category": "food",
     "amount": 72,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9886,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -611,8 +611,8 @@
     "category": "entertainment",
     "amount": 33,
     "currency": "USD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9936,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -622,8 +622,8 @@
     "category": "food",
     "amount": 29,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9917,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -633,8 +633,8 @@
     "category": "food",
     "amount": 23,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9917,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -644,8 +644,8 @@
     "category": "food",
     "amount": 13,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -666,8 +666,8 @@
     "category": "food",
     "amount": 25,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9917,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -677,8 +677,8 @@
     "category": "food",
     "amount": 71,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9886,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -688,8 +688,8 @@
     "category": "travel",
     "amount": 65,
     "currency": "USD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.8595,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -699,8 +699,8 @@
     "category": "entertainment",
     "amount": 11,
     "currency": "USD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -710,8 +710,8 @@
     "category": "food",
     "amount": 60,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9886,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -721,8 +721,8 @@
     "category": "food",
     "amount": 10,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -732,8 +732,8 @@
     "category": "food",
     "amount": 13,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -743,8 +743,8 @@
     "category": "emi",
     "amount": 110,
     "currency": "USD",
-    "confidence": 0.8,
-    "confidence_source": "rules",
+    "confidence": 0.9996,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -754,8 +754,8 @@
     "category": "food",
     "amount": 15,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -765,8 +765,8 @@
     "category": "food",
     "amount": 10,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -776,8 +776,8 @@
     "category": "food",
     "amount": 30,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9917,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -787,8 +787,8 @@
     "category": "entertainment",
     "amount": 32,
     "currency": "USD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9936,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -809,8 +809,8 @@
     "category": "shopping",
     "amount": 51,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9972,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -820,8 +820,8 @@
     "category": "food",
     "amount": 15,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -831,8 +831,8 @@
     "category": "entertainment",
     "amount": 31,
     "currency": "USD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9936,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -842,8 +842,8 @@
     "category": "food",
     "amount": 14,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -864,8 +864,8 @@
     "category": "food",
     "amount": 15,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -875,8 +875,8 @@
     "category": "food",
     "amount": 27,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9917,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -897,8 +897,8 @@
     "category": "investment",
     "amount": 100,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9942,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -919,9 +919,9 @@
     "category": "utilities",
     "amount": 45,
     "currency": "USD",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.6558,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 85,
@@ -930,8 +930,8 @@
     "category": "food",
     "amount": 11,
     "currency": "USD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.984,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -941,8 +941,8 @@
     "category": "food",
     "amount": 315,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -952,8 +952,8 @@
     "category": "healthcare",
     "amount": 570,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9996,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -963,8 +963,8 @@
     "category": "food",
     "amount": 335,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -974,8 +974,8 @@
     "category": "food",
     "amount": 735,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9914,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -985,8 +985,8 @@
     "category": "education",
     "amount": 615,
     "currency": "INR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9884,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -996,8 +996,8 @@
     "category": "investment",
     "amount": 2300,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.999,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1007,8 +1007,8 @@
     "category": "food",
     "amount": 525,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9914,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1018,8 +1018,8 @@
     "category": "food",
     "amount": 290,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1029,8 +1029,8 @@
     "category": "education",
     "amount": 1470,
     "currency": "INR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9667,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1040,9 +1040,9 @@
     "category": "emi",
     "amount": 2530,
     "currency": "INR",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.976,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 96,
@@ -1051,8 +1051,8 @@
     "category": "food",
     "amount": 255,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1062,8 +1062,8 @@
     "category": "food",
     "amount": 1320,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9935,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1073,8 +1073,8 @@
     "category": "entertainment",
     "amount": 255,
     "currency": "INR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1084,8 +1084,8 @@
     "category": "shopping",
     "amount": 1620,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9975,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1095,8 +1095,8 @@
     "category": "food",
     "amount": 1160,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9935,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1106,8 +1106,8 @@
     "category": "travel",
     "amount": 395,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9953,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1117,8 +1117,8 @@
     "category": "food",
     "amount": 235,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1129,7 +1129,7 @@
     "amount": 1040,
     "currency": "INR",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -1139,8 +1139,8 @@
     "category": "travel",
     "amount": 1500,
     "currency": "INR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9684,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1150,8 +1150,8 @@
     "category": "food",
     "amount": 335,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1161,8 +1161,8 @@
     "category": "food",
     "amount": 325,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1172,8 +1172,8 @@
     "category": "food",
     "amount": 1260,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9935,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1183,8 +1183,8 @@
     "category": "healthcare",
     "amount": 405,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9996,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1194,8 +1194,8 @@
     "category": "food",
     "amount": 475,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9914,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1205,8 +1205,8 @@
     "category": "food",
     "amount": 1370,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9935,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1216,8 +1216,8 @@
     "category": "entertainment",
     "amount": 625,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.998,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1227,8 +1227,8 @@
     "category": "education",
     "amount": 470,
     "currency": "INR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9884,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1238,8 +1238,8 @@
     "category": "food",
     "amount": 695,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9914,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1249,8 +1249,8 @@
     "category": "food",
     "amount": 1140,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9935,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1260,8 +1260,8 @@
     "category": "investment",
     "amount": 2300,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.999,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1271,9 +1271,9 @@
     "category": "emi",
     "amount": 2530,
     "currency": "INR",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.976,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 117,
@@ -1282,8 +1282,8 @@
     "category": "food",
     "amount": 290,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1293,8 +1293,8 @@
     "category": "entertainment",
     "amount": 255,
     "currency": "INR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1304,8 +1304,8 @@
     "category": "food",
     "amount": 305,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1315,8 +1315,8 @@
     "category": "food",
     "amount": 1200,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9935,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1326,8 +1326,8 @@
     "category": "entertainment",
     "amount": 640,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.998,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1337,8 +1337,8 @@
     "category": "technology",
     "amount": 845,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9496,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1348,8 +1348,8 @@
     "category": "travel",
     "amount": 355,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9953,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1360,7 +1360,7 @@
     "amount": 1040,
     "currency": "INR",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -1370,8 +1370,8 @@
     "category": "healthcare",
     "amount": 470,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9996,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1381,8 +1381,8 @@
     "category": "food",
     "amount": 235,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1392,8 +1392,8 @@
     "category": "food",
     "amount": 610,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9914,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1403,8 +1403,8 @@
     "category": "travel",
     "amount": 1500,
     "currency": "INR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9684,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1414,8 +1414,8 @@
     "category": "entertainment",
     "amount": 660,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.998,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1425,8 +1425,8 @@
     "category": "food",
     "amount": 255,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1436,8 +1436,8 @@
     "category": "travel",
     "amount": 320,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9953,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1447,8 +1447,8 @@
     "category": "food",
     "amount": 1050,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9935,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1458,8 +1458,8 @@
     "category": "food",
     "amount": 315,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1469,8 +1469,8 @@
     "category": "food",
     "amount": 340,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1480,8 +1480,8 @@
     "category": "travel",
     "amount": 300,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9953,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1491,8 +1491,8 @@
     "category": "entertainment",
     "amount": 575,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.998,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1502,8 +1502,8 @@
     "category": "food",
     "amount": 220,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1513,8 +1513,8 @@
     "category": "food",
     "amount": 240,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1524,8 +1524,8 @@
     "category": "food",
     "amount": 330,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1535,8 +1535,8 @@
     "category": "food",
     "amount": 250,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1546,8 +1546,8 @@
     "category": "food",
     "amount": 345,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1557,8 +1557,8 @@
     "category": "food",
     "amount": 315,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1568,8 +1568,8 @@
     "category": "food",
     "amount": 315,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1579,8 +1579,8 @@
     "category": "food",
     "amount": 275,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1590,8 +1590,8 @@
     "category": "food",
     "amount": 295,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1601,8 +1601,8 @@
     "category": "travel",
     "amount": 370,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9953,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1612,8 +1612,8 @@
     "category": "entertainment",
     "amount": 660,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.998,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1623,8 +1623,8 @@
     "category": "investment",
     "amount": 2300,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.999,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1634,8 +1634,8 @@
     "category": "food",
     "amount": 290,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1645,8 +1645,8 @@
     "category": "food",
     "amount": 320,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1656,9 +1656,9 @@
     "category": "emi",
     "amount": 2530,
     "currency": "INR",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.976,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 152,
@@ -1667,8 +1667,8 @@
     "category": "entertainment",
     "amount": 255,
     "currency": "INR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1678,8 +1678,8 @@
     "category": "food",
     "amount": 1440,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9935,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1689,8 +1689,8 @@
     "category": "food",
     "amount": 690,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9914,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1701,7 +1701,7 @@
     "amount": 1040,
     "currency": "INR",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -1711,8 +1711,8 @@
     "category": "travel",
     "amount": 1500,
     "currency": "INR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9684,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1722,8 +1722,8 @@
     "category": "education",
     "amount": 400,
     "currency": "INR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9884,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1733,8 +1733,8 @@
     "category": "travel",
     "amount": 360,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9953,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1744,8 +1744,8 @@
     "category": "entertainment",
     "amount": 685,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.998,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1755,8 +1755,8 @@
     "category": "food",
     "amount": 340,
     "currency": "INR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9981,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1777,8 +1777,8 @@
     "category": "food",
     "amount": 9,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1788,8 +1788,8 @@
     "category": "healthcare",
     "amount": 19,
     "currency": "GBP",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9968,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1799,8 +1799,8 @@
     "category": "food",
     "amount": 9,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1810,8 +1810,8 @@
     "category": "food",
     "amount": 7,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1821,8 +1821,8 @@
     "category": "food",
     "amount": 10,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1832,8 +1832,8 @@
     "category": "travel",
     "amount": 45,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9334,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1854,8 +1854,8 @@
     "category": "healthcare",
     "amount": 18,
     "currency": "GBP",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9968,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1865,8 +1865,8 @@
     "category": "food",
     "amount": 9,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1876,8 +1876,8 @@
     "category": "entertainment",
     "amount": 20,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9801,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1887,8 +1887,8 @@
     "category": "entertainment",
     "amount": 20,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9801,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1898,9 +1898,9 @@
     "category": "emi",
     "amount": 76,
     "currency": "GBP",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.8398,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 174,
@@ -1909,9 +1909,9 @@
     "category": "investment",
     "amount": 69,
     "currency": "GBP",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.6498,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 175,
@@ -1920,8 +1920,8 @@
     "category": "food",
     "amount": 7,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1931,8 +1931,8 @@
     "category": "food",
     "amount": 8,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1942,8 +1942,8 @@
     "category": "food",
     "amount": 10,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1953,8 +1953,8 @@
     "category": "entertainment",
     "amount": 8,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1964,8 +1964,8 @@
     "category": "food",
     "amount": 37,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9679,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1976,7 +1976,7 @@
     "amount": 31,
     "currency": "GBP",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -1986,8 +1986,8 @@
     "category": "food",
     "amount": 10,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -1997,8 +1997,8 @@
     "category": "food",
     "amount": 49,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9679,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2019,8 +2019,8 @@
     "category": "entertainment",
     "amount": 17,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9801,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2030,8 +2030,8 @@
     "category": "education",
     "amount": 54,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9422,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2052,8 +2052,8 @@
     "category": "food",
     "amount": 7,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2063,8 +2063,8 @@
     "category": "travel",
     "amount": 45,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9334,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2074,9 +2074,9 @@
     "category": "food",
     "amount": 21,
     "currency": "GBP",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.7976,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 190,
@@ -2085,8 +2085,8 @@
     "category": "entertainment",
     "amount": 20,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9801,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2096,8 +2096,8 @@
     "category": "food",
     "amount": 9,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2118,8 +2118,8 @@
     "category": "technology",
     "amount": 28,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9932,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2129,8 +2129,8 @@
     "category": "food",
     "amount": 7,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2140,8 +2140,8 @@
     "category": "education",
     "amount": 14,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9845,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2151,9 +2151,9 @@
     "category": "emi",
     "amount": 76,
     "currency": "GBP",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.8398,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 197,
@@ -2162,8 +2162,8 @@
     "category": "food",
     "amount": 7,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2173,9 +2173,9 @@
     "category": "investment",
     "amount": 69,
     "currency": "GBP",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.6498,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 199,
@@ -2184,9 +2184,9 @@
     "category": "food",
     "amount": 21,
     "currency": "GBP",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.7976,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 200,
@@ -2195,8 +2195,8 @@
     "category": "entertainment",
     "amount": 23,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9801,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2206,8 +2206,8 @@
     "category": "entertainment",
     "amount": 8,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2217,8 +2217,8 @@
     "category": "food",
     "amount": 7,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2228,9 +2228,9 @@
     "category": "food",
     "amount": 16,
     "currency": "GBP",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.7976,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 204,
@@ -2239,8 +2239,8 @@
     "category": "food",
     "amount": 47,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9679,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2250,8 +2250,8 @@
     "category": "healthcare",
     "amount": 15,
     "currency": "GBP",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9968,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2261,8 +2261,8 @@
     "category": "education",
     "amount": 15,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9845,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2272,8 +2272,8 @@
     "category": "education",
     "amount": 18,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9845,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2284,7 +2284,7 @@
     "amount": 31,
     "currency": "GBP",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -2294,8 +2294,8 @@
     "category": "food",
     "amount": 10,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2305,8 +2305,8 @@
     "category": "food",
     "amount": 8,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2316,8 +2316,8 @@
     "category": "food",
     "amount": 8,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2327,8 +2327,8 @@
     "category": "food",
     "amount": 39,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9679,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2338,8 +2338,8 @@
     "category": "food",
     "amount": 33,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9679,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2349,9 +2349,9 @@
     "category": "food",
     "amount": 23,
     "currency": "GBP",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.7976,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 215,
@@ -2360,9 +2360,9 @@
     "category": "food",
     "amount": 18,
     "currency": "GBP",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.7976,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 216,
@@ -2371,8 +2371,8 @@
     "category": "food",
     "amount": 10,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2382,8 +2382,8 @@
     "category": "food",
     "amount": 8,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2393,8 +2393,8 @@
     "category": "food",
     "amount": 51,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9679,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2404,8 +2404,8 @@
     "category": "travel",
     "amount": 45,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9334,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2415,9 +2415,9 @@
     "category": "food",
     "amount": 22,
     "currency": "GBP",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.7976,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 221,
@@ -2426,8 +2426,8 @@
     "category": "food",
     "amount": 40,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9679,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2437,8 +2437,8 @@
     "category": "food",
     "amount": 8,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2448,8 +2448,8 @@
     "category": "food",
     "amount": 36,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9679,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2459,8 +2459,8 @@
     "category": "entertainment",
     "amount": 26,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9801,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2470,9 +2470,9 @@
     "category": "emi",
     "amount": 76,
     "currency": "GBP",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.8398,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 226,
@@ -2481,9 +2481,9 @@
     "category": "investment",
     "amount": 69,
     "currency": "GBP",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.6498,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 227,
@@ -2492,8 +2492,8 @@
     "category": "food",
     "amount": 11,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2503,8 +2503,8 @@
     "category": "food",
     "amount": 7,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2525,8 +2525,8 @@
     "category": "food",
     "amount": 7,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2536,8 +2536,8 @@
     "category": "entertainment",
     "amount": 8,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2547,8 +2547,8 @@
     "category": "shopping",
     "amount": 42,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9973,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2558,8 +2558,8 @@
     "category": "food",
     "amount": 9,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2569,8 +2569,8 @@
     "category": "food",
     "amount": 8,
     "currency": "GBP",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9146,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2581,7 +2581,7 @@
     "amount": 31,
     "currency": "GBP",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -2591,8 +2591,8 @@
     "category": "education",
     "amount": 15,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9845,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2602,8 +2602,8 @@
     "category": "food",
     "amount": 52,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2613,8 +2613,8 @@
     "category": "entertainment",
     "amount": 8,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2624,8 +2624,8 @@
     "category": "food",
     "amount": 12,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2635,8 +2635,8 @@
     "category": "education",
     "amount": 47,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9328,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2646,8 +2646,8 @@
     "category": "food",
     "amount": 9,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2657,8 +2657,8 @@
     "category": "education",
     "amount": 16,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9845,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2668,8 +2668,8 @@
     "category": "investment",
     "amount": 77,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9969,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2679,8 +2679,8 @@
     "category": "food",
     "amount": 44,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2690,8 +2690,8 @@
     "category": "travel",
     "amount": 9,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9486,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2701,8 +2701,8 @@
     "category": "food",
     "amount": 11,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2712,8 +2712,8 @@
     "category": "food",
     "amount": 8,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2723,9 +2723,9 @@
     "category": "emi",
     "amount": 85,
     "currency": "EUR",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.9385,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 249,
@@ -2734,8 +2734,8 @@
     "category": "food",
     "amount": 23,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9726,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2745,8 +2745,8 @@
     "category": "travel",
     "amount": 11,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9486,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2756,8 +2756,8 @@
     "category": "food",
     "amount": 10,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2767,8 +2767,8 @@
     "category": "food",
     "amount": 9,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2778,8 +2778,8 @@
     "category": "food",
     "amount": 8,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2789,9 +2789,9 @@
     "category": "travel",
     "amount": 50,
     "currency": "EUR",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.7296,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 255,
@@ -2800,8 +2800,8 @@
     "category": "food",
     "amount": 8,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2811,9 +2811,9 @@
     "category": "utilities",
     "amount": 35,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
-    "needs_review": false
+    "confidence": null,
+    "confidence_source": "ml",
+    "needs_review": true
   },
   {
     "id": 257,
@@ -2822,8 +2822,8 @@
     "category": "food",
     "amount": 8,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2833,8 +2833,8 @@
     "category": "entertainment",
     "amount": 20,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.991,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2844,8 +2844,8 @@
     "category": "entertainment",
     "amount": 26,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.991,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2855,8 +2855,8 @@
     "category": "travel",
     "amount": 9,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9486,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2866,8 +2866,8 @@
     "category": "education",
     "amount": 20,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9845,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2877,8 +2877,8 @@
     "category": "food",
     "amount": 22,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9726,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2888,8 +2888,8 @@
     "category": "food",
     "amount": 8,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2899,8 +2899,8 @@
     "category": "food",
     "amount": 39,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2910,8 +2910,8 @@
     "category": "food",
     "amount": 11,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2921,8 +2921,8 @@
     "category": "entertainment",
     "amount": 8,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2932,8 +2932,8 @@
     "category": "entertainment",
     "amount": 19,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.991,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2943,8 +2943,8 @@
     "category": "travel",
     "amount": 10,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9486,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2954,8 +2954,8 @@
     "category": "investment",
     "amount": 77,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9969,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2965,8 +2965,8 @@
     "category": "food",
     "amount": 9,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2976,8 +2976,8 @@
     "category": "food",
     "amount": 50,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2987,8 +2987,8 @@
     "category": "food",
     "amount": 11,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -2998,8 +2998,8 @@
     "category": "food",
     "amount": 22,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9726,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3009,8 +3009,8 @@
     "category": "entertainment",
     "amount": 28,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.991,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3020,9 +3020,9 @@
     "category": "emi",
     "amount": 85,
     "currency": "EUR",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.9385,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 276,
@@ -3031,8 +3031,8 @@
     "category": "food",
     "amount": 7,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3042,8 +3042,8 @@
     "category": "food",
     "amount": 8,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3053,8 +3053,8 @@
     "category": "entertainment",
     "amount": 29,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.991,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3064,8 +3064,8 @@
     "category": "healthcare",
     "amount": 13,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9985,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3075,8 +3075,8 @@
     "category": "entertainment",
     "amount": 29,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.991,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3086,9 +3086,9 @@
     "category": "travel",
     "amount": 50,
     "currency": "EUR",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.7296,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 282,
@@ -3097,8 +3097,8 @@
     "category": "shopping",
     "amount": 47,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9953,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3108,8 +3108,8 @@
     "category": "food",
     "amount": 8,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3119,9 +3119,9 @@
     "category": "utilities",
     "amount": 35,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
-    "needs_review": false
+    "confidence": null,
+    "confidence_source": "ml",
+    "needs_review": true
   },
   {
     "id": 285,
@@ -3130,8 +3130,8 @@
     "category": "food",
     "amount": 8,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3141,8 +3141,8 @@
     "category": "food",
     "amount": 45,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3152,8 +3152,8 @@
     "category": "food",
     "amount": 40,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3163,8 +3163,8 @@
     "category": "food",
     "amount": 12,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3174,8 +3174,8 @@
     "category": "food",
     "amount": 23,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9726,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3185,8 +3185,8 @@
     "category": "food",
     "amount": 21,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9726,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3196,8 +3196,8 @@
     "category": "entertainment",
     "amount": 8,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3207,8 +3207,8 @@
     "category": "travel",
     "amount": 10,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9486,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3218,8 +3218,8 @@
     "category": "healthcare",
     "amount": 16,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9985,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3229,8 +3229,8 @@
     "category": "technology",
     "amount": 42,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9986,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3240,8 +3240,8 @@
     "category": "food",
     "amount": 10,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3251,8 +3251,8 @@
     "category": "travel",
     "amount": 11,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9486,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3262,8 +3262,8 @@
     "category": "food",
     "amount": 12,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3273,8 +3273,8 @@
     "category": "food",
     "amount": 10,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3284,8 +3284,8 @@
     "category": "investment",
     "amount": 77,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9969,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3295,8 +3295,8 @@
     "category": "food",
     "amount": 22,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9726,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3306,8 +3306,8 @@
     "category": "food",
     "amount": 46,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3317,8 +3317,8 @@
     "category": "food",
     "amount": 10,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3328,8 +3328,8 @@
     "category": "food",
     "amount": 11,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3339,9 +3339,9 @@
     "category": "emi",
     "amount": 85,
     "currency": "EUR",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.9385,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 305,
@@ -3350,8 +3350,8 @@
     "category": "food",
     "amount": 8,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3361,8 +3361,8 @@
     "category": "food",
     "amount": 11,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3372,8 +3372,8 @@
     "category": "food",
     "amount": 36,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9939,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3383,8 +3383,8 @@
     "category": "healthcare",
     "amount": 15,
     "currency": "EUR",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9985,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3394,9 +3394,9 @@
     "category": "travel",
     "amount": 50,
     "currency": "EUR",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.7296,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 310,
@@ -3405,9 +3405,9 @@
     "category": "utilities",
     "amount": 35,
     "currency": "EUR",
-    "confidence": 0.86,
-    "confidence_source": "rules",
-    "needs_review": false
+    "confidence": null,
+    "confidence_source": "ml",
+    "needs_review": true
   },
   {
     "id": 311,
@@ -3416,8 +3416,8 @@
     "category": "food",
     "amount": 74,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9461,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3427,8 +3427,8 @@
     "category": "food",
     "amount": 92,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9461,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3438,8 +3438,8 @@
     "category": "food",
     "amount": 16,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3449,8 +3449,8 @@
     "category": "food",
     "amount": 22,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3460,8 +3460,8 @@
     "category": "technology",
     "amount": 70,
     "currency": "AUD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9742,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3471,8 +3471,8 @@
     "category": "food",
     "amount": 89,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9461,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3483,7 +3483,7 @@
     "amount": 66,
     "currency": "AUD",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -3493,8 +3493,8 @@
     "category": "entertainment",
     "amount": 38,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9793,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3504,8 +3504,8 @@
     "category": "food",
     "amount": 105,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9461,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3515,8 +3515,8 @@
     "category": "food",
     "amount": 17,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3526,8 +3526,8 @@
     "category": "entertainment",
     "amount": 55,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9793,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3537,8 +3537,8 @@
     "category": "food",
     "amount": 14,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3548,8 +3548,8 @@
     "category": "food",
     "amount": 17,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3559,8 +3559,8 @@
     "category": "entertainment",
     "amount": 40,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9793,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3570,8 +3570,8 @@
     "category": "food",
     "amount": 17,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3581,8 +3581,8 @@
     "category": "entertainment",
     "amount": 16,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3592,8 +3592,8 @@
     "category": "entertainment",
     "amount": 42,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9793,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3603,8 +3603,8 @@
     "category": "investment",
     "amount": 145,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9421,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3614,8 +3614,8 @@
     "category": "food",
     "amount": 21,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3625,8 +3625,8 @@
     "category": "entertainment",
     "amount": 40,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9793,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3636,8 +3636,8 @@
     "category": "food",
     "amount": 48,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9363,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3647,8 +3647,8 @@
     "category": "food",
     "amount": 78,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9461,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3658,8 +3658,8 @@
     "category": "travel",
     "amount": 95,
     "currency": "AUD",
-    "confidence": 0.9,
-    "confidence_source": "rules",
+    "confidence": 0.6874,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3669,9 +3669,9 @@
     "category": "emi",
     "amount": 160,
     "currency": "AUD",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.9728,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 335,
@@ -3680,8 +3680,8 @@
     "category": "food",
     "amount": 17,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3691,8 +3691,8 @@
     "category": "food",
     "amount": 16,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3702,8 +3702,8 @@
     "category": "shopping",
     "amount": 66,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.8711,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3724,8 +3724,8 @@
     "category": "food",
     "amount": 15,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3736,7 +3736,7 @@
     "amount": 66,
     "currency": "AUD",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -3746,8 +3746,8 @@
     "category": "entertainment",
     "amount": 43,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9793,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3758,7 +3758,7 @@
     "amount": 33,
     "currency": "AUD",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -3768,8 +3768,8 @@
     "category": "food",
     "amount": 22,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3779,8 +3779,8 @@
     "category": "food",
     "amount": 15,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3801,8 +3801,8 @@
     "category": "education",
     "amount": 99,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9801,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3812,8 +3812,8 @@
     "category": "food",
     "amount": 22,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3823,8 +3823,8 @@
     "category": "food",
     "amount": 47,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9363,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3835,7 +3835,7 @@
     "amount": 39,
     "currency": "AUD",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -3856,8 +3856,8 @@
     "category": "entertainment",
     "amount": 16,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3868,7 +3868,7 @@
     "amount": 26,
     "currency": "AUD",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -3878,8 +3878,8 @@
     "category": "food",
     "amount": 14,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3889,8 +3889,8 @@
     "category": "food",
     "amount": 21,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3900,8 +3900,8 @@
     "category": "investment",
     "amount": 145,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9421,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3912,7 +3912,7 @@
     "amount": 29,
     "currency": "AUD",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -3922,8 +3922,8 @@
     "category": "food",
     "amount": 73,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9461,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3933,8 +3933,8 @@
     "category": "food",
     "amount": 22,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3944,8 +3944,8 @@
     "category": "food",
     "amount": 90,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9461,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3955,8 +3955,8 @@
     "category": "travel",
     "amount": 95,
     "currency": "AUD",
-    "confidence": 0.9,
-    "confidence_source": "rules",
+    "confidence": 0.6874,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3966,9 +3966,9 @@
     "category": "emi",
     "amount": 160,
     "currency": "AUD",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.9728,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 362,
@@ -3977,8 +3977,8 @@
     "category": "food",
     "amount": 15,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3988,8 +3988,8 @@
     "category": "food",
     "amount": 18,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -3999,8 +3999,8 @@
     "category": "food",
     "amount": 22,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4010,8 +4010,8 @@
     "category": "food",
     "amount": 30,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9363,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4021,8 +4021,8 @@
     "category": "food",
     "amount": 22,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4033,7 +4033,7 @@
     "amount": 66,
     "currency": "AUD",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -4043,8 +4043,8 @@
     "category": "food",
     "amount": 110,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9461,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4054,8 +4054,8 @@
     "category": "food",
     "amount": 30,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9363,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4076,8 +4076,8 @@
     "category": "food",
     "amount": 18,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4087,8 +4087,8 @@
     "category": "food",
     "amount": 19,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4099,7 +4099,7 @@
     "amount": 34,
     "currency": "AUD",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -4109,8 +4109,8 @@
     "category": "food",
     "amount": 20,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4120,8 +4120,8 @@
     "category": "entertainment",
     "amount": 16,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4131,8 +4131,8 @@
     "category": "food",
     "amount": 19,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4142,8 +4142,8 @@
     "category": "investment",
     "amount": 145,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9421,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4153,8 +4153,8 @@
     "category": "food",
     "amount": 16,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9733,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4175,8 +4175,8 @@
     "category": "food",
     "amount": 43,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9363,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4186,8 +4186,8 @@
     "category": "food",
     "amount": 44,
     "currency": "AUD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9363,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4197,8 +4197,8 @@
     "category": "travel",
     "amount": 95,
     "currency": "AUD",
-    "confidence": 0.9,
-    "confidence_source": "rules",
+    "confidence": 0.6874,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4220,7 +4220,7 @@
     "amount": 33,
     "currency": "AUD",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -4230,9 +4230,9 @@
     "category": "emi",
     "amount": 160,
     "currency": "AUD",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.9728,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 386,
@@ -4241,8 +4241,8 @@
     "category": "food",
     "amount": 24,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.8761,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4252,8 +4252,8 @@
     "category": "food",
     "amount": 12,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4263,8 +4263,8 @@
     "category": "travel",
     "amount": 9,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9213,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4274,8 +4274,8 @@
     "category": "investment",
     "amount": 83,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.994,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4286,7 +4286,7 @@
     "amount": 37,
     "currency": "SGD",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -4296,8 +4296,8 @@
     "category": "food",
     "amount": 11,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4307,8 +4307,8 @@
     "category": "entertainment",
     "amount": 9,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4318,8 +4318,8 @@
     "category": "food",
     "amount": 38,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9912,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4329,8 +4329,8 @@
     "category": "travel",
     "amount": 54,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.805,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4340,8 +4340,8 @@
     "category": "food",
     "amount": 11,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4351,9 +4351,9 @@
     "category": "emi",
     "amount": 91,
     "currency": "SGD",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.8398,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 397,
@@ -4362,8 +4362,8 @@
     "category": "food",
     "amount": 9,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4373,8 +4373,8 @@
     "category": "food",
     "amount": 27,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.8761,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4384,8 +4384,8 @@
     "category": "food",
     "amount": 48,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9912,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4395,8 +4395,8 @@
     "category": "entertainment",
     "amount": 25,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.7297,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4406,8 +4406,8 @@
     "category": "food",
     "amount": 45,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9912,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4417,8 +4417,8 @@
     "category": "food",
     "amount": 11,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4428,8 +4428,8 @@
     "category": "entertainment",
     "amount": 30,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.7297,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4439,8 +4439,8 @@
     "category": "food",
     "amount": 10,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4450,8 +4450,8 @@
     "category": "food",
     "amount": 10,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4461,8 +4461,8 @@
     "category": "food",
     "amount": 10,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4472,8 +4472,8 @@
     "category": "food",
     "amount": 27,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.8761,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4483,8 +4483,8 @@
     "category": "shopping",
     "amount": 39,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9978,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4494,8 +4494,8 @@
     "category": "food",
     "amount": 13,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4505,8 +4505,8 @@
     "category": "entertainment",
     "amount": 29,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.7297,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4516,8 +4516,8 @@
     "category": "food",
     "amount": 10,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4527,8 +4527,8 @@
     "category": "entertainment",
     "amount": 28,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.7297,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4538,8 +4538,8 @@
     "category": "food",
     "amount": 27,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.8761,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4549,8 +4549,8 @@
     "category": "healthcare",
     "amount": 16,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9672,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4560,8 +4560,8 @@
     "category": "entertainment",
     "amount": 21,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.7297,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4571,8 +4571,8 @@
     "category": "food",
     "amount": 12,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4582,8 +4582,8 @@
     "category": "food",
     "amount": 10,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4593,8 +4593,8 @@
     "category": "food",
     "amount": 22,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.8761,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4604,8 +4604,8 @@
     "category": "investment",
     "amount": 83,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.994,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4615,8 +4615,8 @@
     "category": "travel",
     "amount": 9,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9213,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4627,7 +4627,7 @@
     "amount": 37,
     "currency": "SGD",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -4637,8 +4637,8 @@
     "category": "entertainment",
     "amount": 9,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4648,8 +4648,8 @@
     "category": "travel",
     "amount": 54,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.805,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4659,8 +4659,8 @@
     "category": "healthcare",
     "amount": 20,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9672,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4670,9 +4670,9 @@
     "category": "emi",
     "amount": 91,
     "currency": "SGD",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.8398,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 426,
@@ -4681,8 +4681,8 @@
     "category": "food",
     "amount": 9,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4692,8 +4692,8 @@
     "category": "entertainment",
     "amount": 23,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.7297,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4703,8 +4703,8 @@
     "category": "food",
     "amount": 12,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4714,8 +4714,8 @@
     "category": "food",
     "amount": 9,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4725,8 +4725,8 @@
     "category": "healthcare",
     "amount": 23,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9672,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4736,8 +4736,8 @@
     "category": "food",
     "amount": 49,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9912,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4747,8 +4747,8 @@
     "category": "food",
     "amount": 11,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4758,8 +4758,8 @@
     "category": "food",
     "amount": 20,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.8761,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4769,8 +4769,8 @@
     "category": "education",
     "amount": 17,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9842,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4780,8 +4780,8 @@
     "category": "food",
     "amount": 42,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9912,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4791,8 +4791,8 @@
     "category": "education",
     "amount": 47,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9851,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4802,8 +4802,8 @@
     "category": "food",
     "amount": 12,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4813,8 +4813,8 @@
     "category": "food",
     "amount": 45,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9912,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4824,8 +4824,8 @@
     "category": "food",
     "amount": 10,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4835,8 +4835,8 @@
     "category": "investment",
     "amount": 83,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.994,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4847,7 +4847,7 @@
     "amount": 37,
     "currency": "SGD",
     "confidence": null,
-    "confidence_source": "rules",
+    "confidence_source": "ml",
     "needs_review": true
   },
   {
@@ -4857,8 +4857,8 @@
     "category": "food",
     "amount": 11,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4868,8 +4868,8 @@
     "category": "travel",
     "amount": 12,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9213,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4879,8 +4879,8 @@
     "category": "entertainment",
     "amount": 9,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.6755,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4890,8 +4890,8 @@
     "category": "food",
     "amount": 10,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4901,8 +4901,8 @@
     "category": "food",
     "amount": 12,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4912,8 +4912,8 @@
     "category": "travel",
     "amount": 54,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.805,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4923,8 +4923,8 @@
     "category": "education",
     "amount": 21,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9842,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4934,9 +4934,9 @@
     "category": "emi",
     "amount": 91,
     "currency": "SGD",
-    "confidence": null,
-    "confidence_source": "rules",
-    "needs_review": true
+    "confidence": 0.8398,
+    "confidence_source": "ml",
+    "needs_review": false
   },
   {
     "id": 450,
@@ -4945,8 +4945,8 @@
     "category": "food",
     "amount": 10,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4956,8 +4956,8 @@
     "category": "travel",
     "amount": 11,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9213,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4967,8 +4967,8 @@
     "category": "food",
     "amount": 9,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4978,8 +4978,8 @@
     "category": "food",
     "amount": 13,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -4989,8 +4989,8 @@
     "category": "travel",
     "amount": 13,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9213,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -5000,8 +5000,8 @@
     "category": "technology",
     "amount": 40,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9839,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -5011,8 +5011,8 @@
     "category": "food",
     "amount": 11,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9955,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -5022,8 +5022,8 @@
     "category": "food",
     "amount": 47,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9912,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -5033,8 +5033,8 @@
     "category": "education",
     "amount": 20,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9842,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -5044,8 +5044,8 @@
     "category": "food",
     "amount": 48,
     "currency": "SGD",
-    "confidence": 0.92,
-    "confidence_source": "rules",
+    "confidence": 0.9912,
+    "confidence_source": "ml",
     "needs_review": false
   },
   {
@@ -5055,8 +5055,8 @@
     "category": "travel",
     "amount": 12,
     "currency": "SGD",
-    "confidence": 0.86,
-    "confidence_source": "rules",
+    "confidence": 0.9213,
+    "confidence_source": "ml",
     "needs_review": false
   }
 ]
