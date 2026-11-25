@@ -1,3 +1,21 @@
 id,name,target_amount,saved_amount,deadline,priority,currency
 1,MacBook Pro M3 Apparatus,1899,1150,2027-02-15,High,CAD
 2,Whistler Ski Reading Week,750,420,2026-12-20,Medium,CAD
+3,MacBook Pro M3,1500,900,2027-03-15,High,USD
+4,Spring Break Road Trip,750,375,2026-12-20,Medium,USD
+5,Emergency Fund,1000,350,2027-06-13,Low,USD
+6,Laptop Upgrade,27600,15180,2027-03-25,High,INR
+7,Goa Trip with Friends,10350,6210,2027-01-04,Medium,INR
+8,Emergency Fund,20700,6210,2027-07-03,Low,INR
+9,New Laptop,895,448,2027-03-15,High,GBP
+10,Interrailing Summer Trip,620,248,2027-05-14,Medium,GBP
+11,Emergency Fund,690,207,2027-07-13,Low,GBP
+12,New Laptop,1000,500,2027-03-20,High,EUR
+13,Erasmus City Trip,540,270,2027-01-24,Medium,EUR
+14,Emergency Fund,770,231,2027-07-03,Low,EUR
+15,MacBook Air,2040,1122,2027-03-10,High,AUD
+16,Byron Bay Weekend Trip,875,438,2026-12-30,Medium,AUD
+17,Emergency Fund,1460,438,2027-06-23,Low,AUD
+18,New Laptop,1080,594,2027-03-10,High,SGD
+19,Bali Holiday,665,299,2027-02-13,Medium,SGD
+20,Emergency Fund,830,249,2027-07-03,Low,SGD

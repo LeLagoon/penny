@@ -1411,7 +1411,7 @@ const server = http.createServer(async (req, res) => {
   serveStatic(req, res, pathname, method);
 });
 
-server.listen(PORT, HOST, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`[Penny Node Engine] Server running at http://localhost:${PORT} (bound to ${HOST})`);
   ml.start();
 });
