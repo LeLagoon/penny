@@ -1,16 +1,5 @@
-"""Local ML service used by server.js.
-
-Standard-library HTTP server (no web framework) wrapping the scikit-learn models in this folder.
-Listens on 127.0.0.1 only and requires the shared token that server.js generates at start-up.
-
-Endpoints
-  GET  /health            service + model status
-  GET  /metrics           evaluation metrics written at training time
-  POST /predict           {"text": "..."}  or  {"texts": ["...", ...]}
-  POST /feedback          {"text": "...", "category": "..."}   learn from a user correction (refits immediately)
-  POST /retrain           full retrain + re-evaluation
-  POST /insights          spending forecasts / anomalies / budget (see insights.py)
-"""
+# Small local http service for server.js (localhost only, needs the token server.js passes in).
+# GET /health, GET /metrics, POST /predict, /feedback, /retrain, /insights
 import json
 import os
 import sys
@@ -26,7 +15,7 @@ import classifier  # noqa: E402
 
 try:
     import insights  # noqa: E402
-except ImportError:  # insights module is optional until it exists
+except ImportError:
     insights = None
 
 HOST = "127.0.0.1"
@@ -59,7 +48,6 @@ def retrain_full():
 
 
 def quick_refit():
-    """Refit only the production model (base + lexicon + feedback). Metrics stay as last evaluated."""
     with STATE["lock"]:
         old = STATE["model"]
         base = classifier.load_base_training()
@@ -78,7 +66,7 @@ def quick_refit():
 class Handler(BaseHTTPRequestHandler):
     server_version = "PennyML/1.0"
 
-    def log_message(self, fmt, *args):  # keep the Node console quiet
+    def log_message(self, fmt, *args):  # keep node console quiet
         pass
 
     def _send(self, status, payload):

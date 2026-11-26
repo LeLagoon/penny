@@ -1,5 +1,4 @@
-// Reads a JSON array of texts on stdin, prints the rule engine's predictions as JSON.
-// Used by ml/classifier.py to compare the ML model with the keyword rules on the same hold-out set.
+// stdin: json array of texts, stdout: rule predictions (used by classifier.py for the baseline)
 import { predictByRules } from '../lib/rules.js';
 
 let input = '';

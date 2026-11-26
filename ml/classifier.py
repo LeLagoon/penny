@@ -1,10 +1,5 @@
-"""Expense-description classifier.
-
-Pipeline:  clean text -> [word 1-2gram TF-IDF  +  char 2-5gram TF-IDF] -> linear classifier.
-Candidates (naive Bayes, logistic regression, calibrated linear SVM) are compared with stratified
-cross-validation on the TRAINING data only; the winner is then scored once on a separate hand-written
-hold-out set (ml/data/test.csv) that is never used for training or model selection.
-"""
+# Expense text classifier: TF-IDF (words + chars) -> linear model.
+# Model is picked with CV on train data, then scored once on test.csv.
 import csv
 import json
 import os
@@ -36,23 +31,19 @@ FEEDBACK_CSV = os.path.join(DATA, "user_feedback.csv")
 MODEL_PATH = os.path.join(ARTIFACTS, "classifier.joblib")
 METRICS_PATH = os.path.join(ARTIFACTS, "classifier_metrics.json")
 
-# A user-taught correction is stronger evidence than a bundled example.
+# corrections from the user count more than the bundled examples
 FEEDBACK_WEIGHT = 5.0
 RANDOM_STATE = 42
 
 
-# ---------------------------------------------------------------------------
-# text + data
-# ---------------------------------------------------------------------------
 def clean_text(text):
-    """Lowercase and remove noise that carries no category information (amounts, txn ids, UPI junk)."""
     t = str(text).lower()
     t = t.replace("’", "'")
     t = re.sub(r"\btxn[a-z0-9]+\b", " ", t)  # TXN684df950
-    t = re.sub(r"\b(inr|usd|gbp|eur|rs)\b\.?", " ", t)  # currency words
-    t = re.sub(r"[₹$£€]\s*\d[\d,\.]*", " ", t)  # symbols with amounts
-    t = re.sub(r"[_/|\\@\-\.]", " ", t)  # separators in UPI / bank strings
-    t = re.sub(r"\b\d+\b", " ", t)  # bare numbers (amounts, ids)
+    t = re.sub(r"\b(inr|usd|gbp|eur|rs)\b\.?", " ", t)
+    t = re.sub(r"[₹$£€]\s*\d[\d,\.]*", " ", t)
+    t = re.sub(r"[_/|\\@\-\.]", " ", t)  # upi separators
+    t = re.sub(r"\b\d+\b", " ", t)
     t = re.sub(r"[^a-z0-9&+' ]", " ", t)
     return re.sub(r"\s+", " ", t).strip()
 
@@ -65,7 +56,6 @@ def _read(path, text_col="text", cat_col="category"):
 
 
 def load_base_training():
-    """train.csv plus the legacy transactions.csv (normalised and de-duplicated)."""
     rows = _read(TRAIN_CSV)
     legacy = _read(LEGACY_CSV, "transaction_text", "category")
     alias = {"eat": "food", "tv": "entertainment", "books": "education", "laptop": "technology"}
@@ -80,7 +70,6 @@ def load_base_training():
 
 
 def load_feedback():
-    """User-taught corrections, latest label wins."""
     latest = {}
     for text, cat in _read(FEEDBACK_CSV):
         key = clean_text(text)
@@ -93,9 +82,6 @@ def load_test():
     return [(t, c) for t, c in _read(TEST_CSV)]
 
 
-# ---------------------------------------------------------------------------
-# model definitions
-# ---------------------------------------------------------------------------
 def make_features():
     return FeatureUnion([
         ("word", TfidfVectorizer(analyzer="word", ngram_range=(1, 2), sublinear_tf=True, min_df=1)),
@@ -121,7 +107,7 @@ LEXICON_WEIGHT = 0.6
 
 
 def lexicon_rows(exclude_keys=()):
-    """Built-in keywords as weak training examples ("swiggy" -> food): prior knowledge for rare merchants."""
+    # keywords from the js lexicon as weak examples, helps with rare merchants
     script = os.path.join(HERE, "lexicon_dump.mjs")
     try:
         proc = subprocess.run(["node", script], capture_output=True, text=True, timeout=30)
@@ -139,13 +125,11 @@ def lexicon_rows(exclude_keys=()):
 
 
 def apply_temperature(proba, temperature):
-    """Sharpen (T<1) or soften (T>1) probabilities without changing which class is the top one."""
     p = np.clip(np.asarray(proba, dtype=float), 1e-12, 1.0) ** (1.0 / temperature)
     return p / p.sum(axis=1, keepdims=True)
 
 
 def fit_temperature(proba, y_true_idx):
-    """Single scalar T minimising log-loss on out-of-fold predictions (temperature scaling)."""
     y_true_idx = np.asarray(y_true_idx)
 
     def nll(t):
@@ -157,7 +141,7 @@ def fit_temperature(proba, y_true_idx):
 
 
 def out_of_fold(model_name, base, extra, folds):
-    """Cross-validated probabilities for the real rows. Weak/extra rows only ever go into the training side."""
+    # extra rows only go on the training side, never in validation
     texts = [t for t, _ in base]
     labels = np.array([c for _, c in base])
     classes = sorted(set(labels) | {c for _, c in extra})
@@ -174,9 +158,6 @@ def out_of_fold(model_name, base, extra, folds):
     return oof, classes
 
 
-# ---------------------------------------------------------------------------
-# evaluation helpers
-# ---------------------------------------------------------------------------
 def expected_calibration_error(conf, correct, bins=10):
     conf, correct = np.asarray(conf), np.asarray(correct, dtype=float)
     edges = np.linspace(0, 1, bins + 1)
@@ -205,7 +186,6 @@ def threshold_table(conf, correct):
 
 
 def rules_baseline_predictions(texts):
-    """Run the JavaScript rule engine on the same texts, for an honest comparison."""
     script = os.path.join(HERE, "rules_predict.mjs")
     proc = subprocess.run(["node", script], input=json.dumps(texts), capture_output=True, text=True, timeout=60)
     if proc.returncode != 0:
@@ -227,26 +207,21 @@ def metrics_for(y_true, y_pred, labels):
     }
 
 
-# ---------------------------------------------------------------------------
-# training
-# ---------------------------------------------------------------------------
 def fit_final(model_name, rows, weights=None):
     texts = [t for t, _ in rows]
     labels = [c for _, c in rows]
     pipe = build_pipeline(candidate_models()[model_name])
     fit_params = {}
     if weights is not None:
-        # sample_weight must reach the final estimator
         fit_params["clf__sample_weight"] = np.asarray(weights, dtype=float)
     try:
         pipe.fit(texts, labels, **fit_params)
     except TypeError:
-        pipe.fit(texts, labels)  # estimator without sample_weight support
+        pipe.fit(texts, labels)  # no sample_weight support
     return pipe
 
 
 def train(select_model=True, forced_model=None, save=True, verbose=False, use_lexicon=True):
-    """Full train + evaluate cycle. Returns (pipeline, metrics)."""
     started = time.time()
     base = load_base_training()
     feedback = load_feedback()
@@ -254,7 +229,7 @@ def train(select_model=True, forced_model=None, save=True, verbose=False, use_le
     labels = sorted({c for _, c in base})
     extra = lexicon_rows({t for t, _ in base}) if use_lexicon else []
 
-    # --- model selection: stratified CV on the base training data only (never the test set) ---
+    # model selection (cv on train data only)
     base_labels = [c for _, c in base]
     min_class = min(base_labels.count(l) for l in labels)
     folds = max(2, min(5, min_class))
@@ -274,12 +249,12 @@ def train(select_model=True, forced_model=None, save=True, verbose=False, use_le
             print(f"  CV {name:24s} acc={cv_results[name]['cv_accuracy']:.3f} macroF1={cv_results[name]['cv_macro_f1']:.3f}")
     best_name = max(cv_results, key=lambda n: cv_results[n]["cv_macro_f1"])
 
-    # --- calibration: temperature fitted on out-of-fold predictions (training data only) ---
+    # calibration
     oof, classes = oof_store[best_name]
     y_idx = [classes.index(c) for c in base_labels]
     temperature = fit_temperature(oof, y_idx)
 
-    # --- hold-out evaluation with a model trained on base (+lexicon) data only ---
+    # hold-out eval, model sees only base + lexicon rows
     weights0 = [1.0] * len(base) + [LEXICON_WEIGHT] * len(extra)
     eval_pipe = fit_final(best_name, list(base) + list(extra), weights0)
     t_texts = [clean_text(t) for t, _ in test]
@@ -296,7 +271,7 @@ def train(select_model=True, forced_model=None, save=True, verbose=False, use_le
 
     ml_metrics = metrics_for(y_true, y_pred, labels)
 
-    # accuracy split: texts containing at least one word seen in training vs. entirely unseen words
+    # accuracy when at least one word was seen vs none
     vocab = eval_pipe.named_steps["features"].transformer_list[0][1].vocabulary_
     known_mask = np.array([any(tok in vocab for tok in t.split()) for t in t_texts])
     split = {
@@ -309,21 +284,21 @@ def train(select_model=True, forced_model=None, save=True, verbose=False, use_le
     try:
         rule_pred = rules_baseline_predictions([t for t, _ in test])
         rules_metrics = metrics_for(y_true, rule_pred, labels)
-    except Exception as exc:  # node missing, etc.
+    except Exception as exc:  # node not installed
         rules_metrics = {"error": str(exc)[:200]}
 
     errors = [{"text": test[i][0], "true": y_true[i], "predicted": str(y_pred[i]), "confidence": round(float(conf[i]), 3)}
               for i in np.where(~correct)[0]]
     errors.sort(key=lambda e: -e["confidence"])
 
-    # --- production model: base data + lexicon + user feedback (weighted) ---
+    # final model also gets the user feedback
     prod_rows = list(base) + list(extra) + [(t, c) for t, c in feedback]
     weights = weights0 + [FEEDBACK_WEIGHT] * len(feedback)
     prod = fit_final(best_name, prod_rows, weights)
 
     thresholds = threshold_table(conf, correct)
     review_threshold = 0.5
-    for row in thresholds:  # smallest threshold whose accepted predictions are at least 95% accurate
+    for row in thresholds:  # first threshold that gets 95%+ accuracy
         if row["accuracy_when_accepted"] is not None and row["accuracy_when_accepted"] >= 0.95 and row["threshold"] > 0:
             review_threshold = row["threshold"]
             break
@@ -359,7 +334,6 @@ def train(select_model=True, forced_model=None, save=True, verbose=False, use_le
 
 
 def predict(model, text, top_k=3):
-    """model: dict returned by train()/load_model()."""
     pipe, temperature = model["pipeline"], model["temperature"]
     cleaned = clean_text(text)
     if not cleaned:
@@ -380,7 +354,6 @@ def predict(model, text, top_k=3):
 
 
 def add_feedback(text, category):
-    """Store a user-taught example (latest label for the same cleaned text wins)."""
     os.makedirs(DATA, exist_ok=True)
     key = clean_text(text)
     if not key:

@@ -70,7 +70,7 @@ const BASE_CAT_NAMES = {
 let CAT_COLORS = { ...BASE_CAT_COLORS };
 let CAT_NAMES = { ...BASE_CAT_NAMES };
 
-// fetch wrapper: turns HTTP errors (e.g. a 400 validation message from the server) into exceptions.
+// fetch wrapper, http errors become exceptions
 async function apiFetch(url, options) {
   const res = await fetch(url, options);
   if (!res.ok) {
@@ -81,8 +81,7 @@ async function apiFetch(url, options) {
   return res;
 }
 
-// How sure the system is, shown honestly. Nothing here is invented: the number is the model's
-// own probability, and "Not sure" appears when the model says a human should check.
+// confidence shown as the model's own probability, "Not sure" when it needs a check
 function predictionBadge(p) {
   const pct = typeof p.confidence === 'number' ? Math.round(p.confidence * 100) : null;
   const engineName = p.engine === 'ml' || p.confidence_source === 'ml' ? 'AI model'
@@ -109,7 +108,7 @@ function setPredictionPill(el, prediction) {
   el.title = b.title;
 }
 
-// Escape user-controlled text before putting it into innerHTML (prevents script injection).
+// escape user text before innerHTML
 function escapeHtml(value) {
   return String(value === undefined || value === null ? '' : value)
     .replace(/&/g, '&amp;')
@@ -119,10 +118,7 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-// Every expense/goal remembers the currency it was entered in. Only entries in the active
-// currency are shown and summed; the rest are kept on disk and reappear when you switch back.
-// Ledger buttons carry only an expense id; the description and category are looked up here,
-// so user-entered text never has to be embedded in an inline onclick string.
+// only entries in the active currency are shown, the rest reappear when you switch back
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('#ledger-tbody [data-action]');
   if (!btn) return;
@@ -191,7 +187,6 @@ function initSidebar() {
 }
 
 
-// ---- Theme (light / dark) ----
 function currentTheme() {
   return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
 }
@@ -213,7 +208,6 @@ function toggleTheme() {
   }
 }
 
-// Follow the system setting until the user picks a theme themselves.
 if (window.matchMedia) {
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
     let saved = null;
@@ -222,11 +216,7 @@ if (window.matchMedia) {
   });
 }
 
-// ---- Smooth number changes on the headline figures ----
-// Every figure always settles on the exact text the page rendered: the count-up only ever
-// shows in-between values for a moment, and a timer forces the final text even if animation
-// frames are paused (background tab) or another render arrives mid-way. Changing currency,
-// or anything that is not the same kind of number, swaps instantly with no tween.
+// numbers count up to the rendered text; a timer forces the final value so it never gets stuck
 (function initNumberTween() {
   const NUM = /^([^\d-]*)(-?[\d,]+(?:\.\d+)?)(.*)$/;
   const DURATION = 600;
@@ -281,7 +271,6 @@ if (window.matchMedia) {
       st.timer = setTimeout(() => settle(next), DURATION + 150); // always finish on the real value
     }
     obs.observe(el, { childList: true, characterData: true, subtree: true });
-    // Process a render that the observer has not reported yet (callbacks arrive asynchronously).
     st.sync = () => { if (obs.takeRecords().length) onMutate(); };
   }
 
@@ -290,7 +279,6 @@ if (window.matchMedia) {
     applyTheme(currentTheme());
   });
 
-  // Anything still mid-count is forced to its final text (used after a currency switch).
   window.settleNumbers = () => {
     document.querySelectorAll('[id^="kpi-"].kpi-num, #rail-budget, #rail-income, #rail-tuition, #rail-net-inflow, #donut-center-total').forEach(el => {
       if (el._tw) {
@@ -304,8 +292,7 @@ if (window.matchMedia) {
   };
 })();
 
-// Cmd/Ctrl+Shift+R (hard reload) brings back the first-run setup with empty fields.
-// Saved data is not deleted; it is replaced only if the setup is completed.
+// Cmd/Ctrl+Shift+R shows the blank first-run setup (saved data is only replaced once finished)
 const PENNY_HARD_RESET = (() => {
   try {
     if (sessionStorage.getItem('penny_hard_reset')) {
@@ -424,8 +411,7 @@ async function handleRegionSwitch(regionCode) {
   setRegion(regionCode);
 
   try {
-    // Switching region only changes the profile's country (and so the currency shown).
-    // Nothing the user entered is replaced or converted.
+    // only the country changes, nothing entered is converted
     if (STATE.profile) {
       STATE.profile.country = regionCode;
       const res = await apiFetch('/api/profile', {
@@ -451,7 +437,7 @@ async function handleRegionSwitch(regionCode) {
       showToast(`${hiddenTxns} expense(s) and ${hiddenGoals} goal(s) in other currencies are kept and hidden until you switch back.`);
     }
 
-    // Amounts are not converted automatically, so ask the user to enter them in the new currency.
+    // amounts aren't converted, ask for them in the new currency
     openRegionUpdatePrompt(reg);
   } catch (err) {
     console.error('Failed to switch region:', err);
@@ -459,7 +445,6 @@ async function handleRegionSwitch(regionCode) {
   }
 }
 
-// After a region switch, reuse the profile dialog to collect college and amounts in the new currency.
 function openRegionUpdatePrompt(reg) {
   openProfileModal(false);
 
@@ -472,7 +457,7 @@ function openRegionUpdatePrompt(reg) {
   }
   if (submitBtn) submitBtn.textContent = 'Save Details';
 
-  // The old amounts are in the previous currency, so start from this region's typical values.
+  // old amounts are in the previous currency, start from typical values
   const tuitionInp = document.getElementById('ob-tuition');
   const incomeInp = document.getElementById('ob-income');
   const aidInp = document.getElementById('ob-aid');
@@ -481,7 +466,6 @@ function openRegionUpdatePrompt(reg) {
   if (aidInp) aidInp.value = reg.sampleAid;
   setTuitionPeriod('annual');
 
-  // If the saved college is in another country, preselect the first one in this region.
   const current = STATE.colleges.find(c => c.name === (STATE.profile && STATE.profile.college));
   if (!current || current.country !== reg.code) {
     const first = STATE.colleges.find(c => c.country === reg.code);
@@ -594,7 +578,6 @@ async function loadGoals() {
   }
 }
 
-// Personalised budget, forecast, unusual spending and recurring bills (from the ML service).
 async function loadInsights() {
   try {
     const res = await fetch('/api/insights');
@@ -604,7 +587,6 @@ async function loadInsights() {
   }
 }
 
-// The budget shown everywhere: learned from your own history when available, else the formula estimate.
 function effectiveBudget() {
   const ins = STATE.insights;
   if (ins && ins.available && ins.budget && ins.budget.recommended > 0) return ins.budget.recommended;
@@ -1149,8 +1131,6 @@ function filterLedger(cat, btn) {
 }
 
 
-// --- Category pickers for the add-expense forms --------------------------------------------
-// First option is always "Auto-detect" (the default). Then every category, then "Add new category".
 const CATEGORY_SELECTS = { 'inline-cat-select': 'inline-cat-conf', 'qm-cat-select': 'qm-cat-conf' };
 const autoDetected = {};
 
@@ -1201,7 +1181,7 @@ function onCategorySelectChange(sel) {
   syncCategoryPill(sel.id);
 }
 
-// Called by the predictors: remember the guess and show it as the "Auto-detect" option.
+// remember the guess and show it as the Auto-detect option
 function noteAutoDetected(selId, data) {
   autoDetected[selId] = data.category;
   populateCategorySelect(selId);
@@ -1268,7 +1248,6 @@ async function deleteExpense(id) {
   }
 }
 
-// --- Teach / correct a category (dialog) -----------------------------------------------------
 let teachTargetId = null;
 
 function openTeachModal(id) {
@@ -1319,13 +1298,11 @@ async function handleTeachSubmit(e) {
   const category = document.getElementById('teach-cat').value;
   const remember = document.getElementById('teach-remember').checked;
   try {
-    // 1. Fix this expense now.
     await apiFetch(`/api/transactions/${teachTargetId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ category })
     });
-    // 2. Optionally teach the AI so similar descriptions are labelled correctly next time.
     let learned = null;
     if (remember) {
       const res = await apiFetch('/api/nlp/teach', {
@@ -1494,8 +1471,7 @@ function updateSimulation(pctVal) {
   const lbl = document.getElementById('sim-pct-lbl');
   if (lbl) lbl.textContent = `${STATE.simCutPct}% Spend Reduction`;
 
-  // Monthly spend on discretionary categories: your average over complete months when we have them,
-  // otherwise this month's pace. (Never all-time totals mistaken for a month.)
+  // avg of complete months if we have them, else this month's pace
   const ins = STATE.insights && STATE.insights.available ? STATE.insights : null;
   let discSpend;
   let basis;
@@ -1515,7 +1491,6 @@ function updateSimulation(pctVal) {
   const monthlySavings = Math.round(discSpend * (STATE.simCutPct / 100));
   const annualSavings = monthlySavings * 12;
 
-  // How long would those savings take to fully fund the most urgent unfinished goal?
   const priorityRank = { High: 0, Medium: 1, Low: 2 };
   const open = STATE.goals
     .filter(g => parseFloat(g.saved_amount) < parseFloat(g.target_amount))
@@ -2036,7 +2011,6 @@ function closeProfileModal() {
   }, 240);
 }
 
-// ---- Student details modal: first-run steps + edit side panel ----
 let obStep = 0;
 let obMax = 0;
 let obSetup = false;
@@ -2252,8 +2226,7 @@ function handleModalRegionChange(regionCode) {
   obRefreshSummary(true);
 }
 
-// A known college fixes the campus location: show its city and lock the city dropdown.
-// "Other / Independent Institution" (or no college yet) leaves the city free to choose.
+// known college fixes the city, "Other" leaves it free
 function syncCityLock(collegeName) {
   const citySelect = document.getElementById('ob-city');
   if (!citySelect) return;

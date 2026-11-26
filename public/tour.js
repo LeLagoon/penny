@@ -1,6 +1,4 @@
-// Guided tour: dims the page, highlights one section at a time and explains it.
-// Starts once, right after a new student finishes the first-run setup. It can be replayed
-// from "Take the tour" in the sidebar.
+// guided tour, runs once after first setup, replay from the sidebar
 (function () {
   const DONE_KEY = 'penny_tour_done';
 
@@ -155,7 +153,7 @@
       else if (side === 'left') { left = rect.left - GAP - w; top = cy; }
       else if (side === 'bottom') { top = rect.top + rect.height + GAP; left = cx; }
       else if (side === 'top') { top = rect.top - GAP - h; left = cx; }
-      else { top = vh - h - 24; left = (vw - w) / 2; } // target too large: dock at the bottom
+      else { top = vh - h - 24; left = (vw - w) / 2; } // too big, dock at bottom
     }
     left = Math.min(Math.max(left, MARGIN), vw - w - MARGIN);
     top = Math.min(Math.max(top, MARGIN), vh - h - MARGIN);
@@ -175,7 +173,7 @@
     });
   }
 
-  // Wait until the page has stopped scrolling so the spotlight lands on the final position.
+  // wait for scroll to stop so the spotlight lands right
   async function settleScroll(el) {
     if (!el) return;
     const r = el.getBoundingClientRect();
@@ -200,7 +198,7 @@
     busy = true;
     const my = ++token;
 
-    // Skip a step whose section is not on screen (for example a hidden sidebar on a small window).
+    // skip steps that aren't visible (hidden sidebar on small screens)
     while (next >= 0 && next < STEPS.length && STEPS[next].target && !visible(STEPS[next].target())) next += dir;
     if (next < 0 || next >= STEPS.length) { busy = false; return next >= STEPS.length ? finish() : undefined; }
 
@@ -223,7 +221,6 @@
     els.next.focus({ preventScroll: true });
   }
 
-  // Keep the highlight on its section while the window is resized or scrolled.
   function follow() {
     if (!active || busy) return;
     root.classList.add('follow');
@@ -274,7 +271,6 @@
     window.addEventListener('keydown', onKey, true);
     window.addEventListener('resize', follow);
     window.addEventListener('scroll', follow, true);
-    // First frame: centered welcome card appears from the middle of the screen.
     placeSpot(null);
     fillContent(0);
     placeCard(null);

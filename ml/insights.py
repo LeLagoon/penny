@@ -1,19 +1,5 @@
-"""Personalised budget, spending forecast, unusual-spend detection and goal feasibility.
-
-Everything here learns from the user's OWN ledger, not from demographics (the bundled student
-dataset turned out to carry no usable signal, see data_quality_report()).
-
-Methods (all deliberately simple, explainable and honest about how much data they have):
-  * Budget          Bayesian shrinkage: the cost-of-living estimate acts as a prior worth K months of
-                    data; each complete month of real spending moves the recommendation towards what
-                    the user actually spends. Backtested when enough history exists.
-  * Forecast        month-to-date spend + robust daily pace for the remaining days + recurring bills
-                    still to come, with a ~80% interval and a probability of exceeding the budget.
-  * Recurring       description similarity (TF-IDF char n-grams + cosine) groups the same merchant across
-                    months; groups seen in 2+ months with a stable amount count as recurring.
-  * Anomalies       modified z-score (median / MAD) of log-amounts per category.
-  * Goals           required monthly saving vs. estimated monthly surplus.
-"""
+# Budget, forecast, recurring bills, anomalies and goal checks.
+# Uses the user's own ledger only. The student dataset had no signal (see data_quality_report).
 import calendar
 import math
 import os
@@ -25,15 +11,12 @@ import numpy as np
 
 import classifier
 
-PRIOR_WEIGHT_MONTHS = 2.0  # the cost-of-living estimate counts as this many months of evidence
-FIXED_LIKE = {"emi", "investment", "utilities"}  # lumpy, usually once a month
+PRIOR_WEIGHT_MONTHS = 2.0  # prior counts as 2 months of data
+FIXED_LIKE = {"emi", "investment", "utilities"}
 DISCRETIONARY = ("food", "entertainment", "shopping")
-Z80 = 1.2816  # 80% two-sided interval
+Z80 = 1.2816  # 80% interval
 
 
-# ---------------------------------------------------------------------------
-# helpers
-# ---------------------------------------------------------------------------
 def _d(s):
     return datetime.strptime(s[:10], "%Y-%m-%d").date()
 
@@ -64,7 +47,6 @@ def _clean_txns(raw):
 
 
 def _complete_months(txns, today):
-    """Months fully covered by the ledger: before this month, and not the (probably partial) first month."""
     if not txns:
         return []
     first = txns[0]["date"]
@@ -78,14 +60,11 @@ def _complete_months(txns, today):
         if key >= this_key:
             continue
         if key == first_key and first.day > 5:
-            continue  # ledger starts mid-month, so that month is incomplete
+            continue  # first month is partial
         months.append((key, by_month[key]))
     return months
 
 
-# ---------------------------------------------------------------------------
-# budget
-# ---------------------------------------------------------------------------
 def _shrink(prior, monthly_totals):
     n = len(monthly_totals)
     if n == 0:
@@ -134,9 +113,6 @@ def budget_estimate(prior, months, backtest=True):
     }
 
 
-# ---------------------------------------------------------------------------
-# recurring merchants (text similarity)
-# ---------------------------------------------------------------------------
 def find_recurring(txns, today, max_items=1000):
     from sklearn.feature_extraction.text import TfidfVectorizer
     recent = txns[-max_items:]
@@ -172,8 +148,7 @@ def find_recurring(txns, today, max_items=1000):
             continue
         amounts = [t["amount"] for t in items if _month_key(t["date"]) < this_key]
         med = float(np.median(amounts))
-        # A bill repeats about once a month at a steady amount. Frequent, variable merchants
-        # (daily lunches, rides) are habits, not bills.
+        # lunches and rides repeat too but they're habits, not bills
         per_month = len(amounts) / max(len(past_months), 1)
         spread = float(np.std(amounts)) / med if med else 1.0
         if per_month > 1.6 or spread > 0.25:
@@ -191,9 +166,6 @@ def find_recurring(txns, today, max_items=1000):
     return out
 
 
-# ---------------------------------------------------------------------------
-# forecast
-# ---------------------------------------------------------------------------
 def forecast_month(txns, today, budget, recurring, months):
     key = _month_key(today)
     D = calendar.monthrange(today.year, today.month)[1]
@@ -211,7 +183,7 @@ def forecast_month(txns, today, budget, recurring, months):
     var_total = sum(t["amount"] for t in variable)
     rate_now = var_total / max(d, 1)
 
-    # historical variable daily rate from complete months, to stabilise early-month estimates
+    # past daily rate keeps early-month estimates from swinging
     hist_rate = None
     if months:
         keys = {k for k, _ in months}
@@ -228,9 +200,8 @@ def forecast_month(txns, today, budget, recurring, months):
 
     remaining_days = D - d
     expected_recurring = sum(r["typical_amount"] for r in recurring if r["status"] == "upcoming")
-    # recurring bills already counted as lumpy/paid are not double counted: only 'upcoming' ones are added.
+    # only upcoming bills, paid ones are already in spent
 
-    # daily variable spend noise
     daily = defaultdict(float)
     for t in variable:
         daily[t["date"]] += t["amount"]
@@ -256,9 +227,6 @@ def forecast_month(txns, today, budget, recurring, months):
     }
 
 
-# ---------------------------------------------------------------------------
-# anomalies
-# ---------------------------------------------------------------------------
 def detect_anomalies(txns, today, window_days=45, top=5):
     by_cat = defaultdict(list)
     for t in txns:
@@ -291,9 +259,6 @@ def detect_anomalies(txns, today, window_days=45, top=5):
     return flagged[:top]
 
 
-# ---------------------------------------------------------------------------
-# categories, discretionary, goals
-# ---------------------------------------------------------------------------
 def category_trends(txns, today, months):
     key = _month_key(today)
     d = today.day
@@ -359,9 +324,6 @@ def goal_feasibility(goals, today, monthly_inflow, monthly_tuition, typical_spen
             "surplus_basis": "income + aid - tuition - typical monthly spending"}
 
 
-# ---------------------------------------------------------------------------
-# dataset sanity check (why the student dataset is not used for predictions)
-# ---------------------------------------------------------------------------
 _QUALITY = {}
 
 
@@ -396,9 +358,6 @@ def data_quality_report():
     return _QUALITY
 
 
-# ---------------------------------------------------------------------------
-# entry point
-# ---------------------------------------------------------------------------
 def compute(payload):
     today = _d(payload["today"]) if payload.get("today") else date.today()
     txns = _clean_txns(payload.get("transactions"))

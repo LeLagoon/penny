@@ -1,12 +1,6 @@
-"""Builds ml/data/train.csv and ml/data/test.csv.
-
-Provenance: every phrase below was written by hand to look like real expense descriptions
-(plain text, UPI / bank-statement strings, POS strings, typos, mixed regions). They are NOT real
-user transactions. The TEST set is written separately, uses different merchants and phrasings, and
-is never used for training or tuning, so it measures generalisation rather than memorisation.
-
-Replace / extend these with real, anonymised descriptions when you have them.
-"""
+# Builds ml/data/train.csv and test.csv.
+# All phrases are hand-written, not real transactions. The test set uses different merchants and
+# phrasings so it checks generalisation. Swap in real anonymised data if you ever get it.
 import csv
 import os
 import re
@@ -234,7 +228,7 @@ def norm(t):
 if __name__ == "__main__":
     tr = write("train.csv", TRAIN)
     train_keys = {norm(t) for t, _ in tr}
-    # Any test phrase that also appears in training is dropped, so the test set never leaks.
+    # drop test phrases that also appear in train
     dropped = [t for items in TEST.values() for t in items if norm(t) in train_keys]
     te = write("test.csv", TEST, exclude=train_keys)
     print(f"train rows: {len(tr)}, test rows: {len(te)}")

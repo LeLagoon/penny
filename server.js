@@ -24,10 +24,8 @@ const FEEDBACK_CSV = path.join(BASE_DIR, 'transaction_feedback.csv');
 const STUDENT_CSV = path.join(BASE_DIR, 'student.csv');
 const TRANSACTIONS_CSV = path.join(BASE_DIR, 'transactions.csv');
 
-// pppFromUSD: local currency units that buy what 1 USD buys in the US (purchasing-power parity).
-// These are ROUNDED APPROXIMATIONS of World Bank ICP figures. Please verify/update them before relying on them.
-// They are used instead of market exchange rates because converting US student spending at market rates
-// grossly overstates local prices (e.g. 90x for India).
+// pppFromUSD = local units that buy what 1 USD buys in the US. Rounded World Bank ICP numbers,
+// worth double checking. Market rates would make India look ~90x too expensive.
 const REGIONS = {
   US: {
     code: 'US',
@@ -447,7 +445,7 @@ function readJson(filePath, fallback = null) {
   return fallback;
 }
 
-// Write to a temp file then rename, so a crash mid-write can't leave a half-written data file.
+// temp file + rename so a crash can't leave a half-written file
 function writeFileAtomic(filePath, text) {
   const tmp = `${filePath}.${process.pid}.tmp`;
   fs.writeFileSync(tmp, text, 'utf8');
@@ -458,8 +456,7 @@ function writeJson(filePath, data) {
   writeFileAtomic(filePath, JSON.stringify(data, null, 2));
 }
 
-// Like readJson, but a file that exists and cannot be parsed is an error rather than "no data",
-// so callers never overwrite a damaged file with defaults.
+// like readJson but a broken file throws instead of returning nothing, so we never overwrite it
 function readJsonStrict(filePath) {
   if (!fs.existsSync(filePath)) return null;
   try {
@@ -469,7 +466,7 @@ function readJsonStrict(filePath) {
   }
 }
 
-// RFC 4180-style parser: quoted fields may contain commas, quotes ("") and newlines.
+// csv parser, quoted fields can have commas, "" and newlines
 function parseCsv(text) {
   const rows = [];
   let row = [];
@@ -547,8 +544,7 @@ function getCustomCategories() {
   return DEFAULT_CUSTOM_CATEGORIES;
 }
 
-// Rule-based categorisation lives in lib/rules.js. This wrapper supplies the user's taught rules
-// and custom categories.
+// wrapper around lib/rules.js with the user's rules and custom categories
 function predictCategory(text) {
   return predictByRules(text, { learned: getLearnedRules(), custom: getCustomCategories() });
 }
@@ -556,8 +552,7 @@ function predictCategory(text) {
 const ml = createMlClient({ rootDir: BASE_DIR });
 const ML_FEEDBACK_CSV = path.join(BASE_DIR, 'ml', 'data', 'user_feedback.csv');
 
-// Sources where the USER made the decision (taught rule, own category keywords). These always
-// win; everything else is decided by the ML model, with the keyword rules as a fallback.
+// these come from the user so they always win, otherwise ML (rules as fallback)
 const USER_DECIDED_SOURCES = new Set(['user_rule_exact', 'user_rule_partial', 'custom_category']);
 
 async function classify(text) {
@@ -605,16 +600,13 @@ async function classifyMany(texts) {
   return results;
 }
 
-// Insert or replace one row (matched on a key column) in a small CSV file.
 function upsertCsvRow(file, headers, keyField, row) {
   const rows = readCsv(file).filter(r => String(r[keyField]).toLowerCase() !== String(row[keyField]).toLowerCase());
   rows.push(row);
   writeCsv(file, headers, rows);
 }
 
-// Stored confidences are only trusted if a model produced them. Entries without one (older data,
-// samples) get a real prediction: the confidence that the stored label is right, or null when the
-// model disagrees with the stored label.
+// old/sample entries have no model confidence, so score them now (null if the model disagrees)
 async function annotateLedger(txns) {
   const stale = txns.filter(t => !t.confidence_source || (t.confidence_source === 'rules' && ml.isReady()));
   if (!stale.length) return txns;
@@ -765,9 +757,6 @@ function getPeerBenchmarks(profile) {
   };
 }
 
-// ---------------------------------------------------------------------------
-// HTTP layer
-// ---------------------------------------------------------------------------
 
 const HOST = process.env.HOST || '127.0.0.1';
 const MAX_BODY_BYTES = 100 * 1024;
@@ -828,7 +817,6 @@ function readJsonBody(req) {
   });
 }
 
-// --- validation helpers -----------------------------------------------------
 
 function vString(value, name, { max = 200, required = false } = {}) {
   if (value === undefined || value === null || value === '') {
@@ -893,7 +881,6 @@ function vRegionCode(value, name = 'country') {
   return s;
 }
 
-// --- data access ------------------------------------------------------------
 
 const GOAL_HEADERS = ['id', 'name', 'target_amount', 'saved_amount', 'deadline', 'priority', 'currency'];
 
@@ -901,9 +888,8 @@ function currentRegion() {
   return getRegionForProfile(readJson(USER_PROFILE_FILE, null));
 }
 
-// Sample data for every country, added once per country so each region has something to show.
-// A country the user already has entries for is left alone, and one the user later empties
-// is not refilled (the marker file remembers which countries were handled).
+// demo data is added once per country; seeded_regions.json remembers which are done so an
+// emptied country doesn't get refilled
 function demoFor(kind, region) {
   if (hasDemoData(region.code)) return kind === 'expenses' ? buildDemoExpenses(region) : buildDemoGoals(region);
   return kind === 'expenses' ? region.demoExpenses : region.demoGoals;
@@ -928,8 +914,7 @@ function seedMissingRegions(kind, items) {
   return { items: out, added };
 }
 
-// Every expense and goal remembers the currency it was entered in, so switching region
-// never reinterprets old amounts. Older rows with no currency are tagged with the current one.
+// tag each row with its currency so switching region doesn't reinterpret old amounts
 function loadLedger() {
   const region = currentRegion();
   const stored = readJsonStrict(USER_LEDGER_FILE);
@@ -979,7 +964,7 @@ function buildProfile(body) {
   const region = vRegionCode(body.country) || getRegionForProfile(body).code;
   const period = body.tuition_period === 'semester' ? 'semester' : 'annual';
   const college = vString(body.college, 'college', { max: 120, required: true });
-  // A known college fixes the campus location; only "Other"/custom colleges can choose a city.
+  // known college fixes the city
   const knownCollege = COLLEGES.find(c => c.name === college && !c.name.startsWith('Other'));
   const campusCity = knownCollege ? knownCollege.city : vString(body.campus_city, 'campus_city', { max: 80 });
   return {
@@ -999,7 +984,6 @@ function buildProfile(body) {
   };
 }
 
-// --- API --------------------------------------------------------------------
 
 async function handleApi(req, res, pathname, method) {
   let m;
@@ -1029,8 +1013,7 @@ async function handleApi(req, res, pathname, method) {
     const date = vDate(body.date || new Date().toISOString().slice(0, 10), 'date');
     const pred = await classify(description);
     const chosen = vCategory(body.category, 'category', { required: false });
-    // The category and confidence always come from the server. If the user picked a category that
-    // differs from the prediction, that is their decision (confidence 1, source "user").
+    // category/confidence come from the server, unless the user overrode it (confidence 1)
     let category = pred.category || 'miscellaneous';
     let confidence = pred.confidence;
     let confidenceSource = pred.engine === 'ml' ? 'ml' : 'rules';
@@ -1051,7 +1034,7 @@ async function handleApi(req, res, pathname, method) {
   }
 
   if (pathname === '/api/transactions/reset' && method === 'POST') {
-    // Replaces only the demo data for one currency; entries in other currencies are kept.
+    // only resets the current currency
     const body = await readJsonBody(req);
     const reg = REGIONS[vRegionCode(body.country)] || currentRegion();
     const kept = loadLedger().filter(t => t.currency !== reg.currency);
@@ -1115,12 +1098,12 @@ async function handleApi(req, res, pathname, method) {
   }
 
   if (pathname === '/api/goals/reset' && method === 'POST') {
-    // Replaces only the default goals for one currency; goals in other currencies are kept.
+    // same here, other currencies stay
     const body = await readJsonBody(req);
     const reg = REGIONS[vRegionCode(body.country)] || currentRegion();
     const kept = loadGoals().filter(g => g.currency !== reg.currency);
     const all = [...demoFor('goals', reg).map(g => ({ ...g, currency: reg.currency })), ...kept];
-    // keep ids unique across the combined list
+    // ids need to stay unique
     all.forEach((g, i) => { g.id = i + 1; });
     saveGoals(all);
     return sendJson(res, 200, { success: true, all, region: reg.code });
@@ -1194,17 +1177,17 @@ async function handleApi(req, res, pathname, method) {
     const normText = vString(body.text, 'text', { max: 200, required: true }).toLowerCase();
     const normCat = vCategory(body.category, 'category');
 
-    // Re-teaching the same text replaces the old rule instead of piling up duplicates.
+    // same text replaces the old rule
     upsertCsvRow(LEARNED_CSV, ['transaction_text', 'category'], 'transaction_text', { transaction_text: normText, category: normCat });
     upsertCsvRow(FEEDBACK_CSV, ['transaction_text', 'category'], 'transaction_text', { transaction_text: normText, category: normCat });
     fs.mkdirSync(path.dirname(ML_FEEDBACK_CSV), { recursive: true });
     upsertCsvRow(ML_FEEDBACK_CSV, ['text', 'category'], 'text', { text: normText, category: normCat });
 
-    // The ML model learns from the correction straight away (it refits in about a quarter of a second).
+    // refit takes ~0.25s so just do it now
     let mlLearned = false;
     if (ml.isReady()) {
       try { await ml.feedback(normText, normCat); mlLearned = true; } catch (err) {
-        // custom categories are not known to the model; the taught rule still applies
+        // model doesn't know custom categories, the rule still applies
         if (!/not a category the model knows/.test(err.message)) console.warn('[Penny] ML feedback failed:', err.message);
       }
     }
@@ -1310,7 +1293,6 @@ async function handleApi(req, res, pathname, method) {
   throw new HttpError(404, 'Not found');
 }
 
-// --- static files (only ever served from ./public) ----------------------------
 
 function serveStatic(req, res, pathname, method) {
   if (method !== 'GET' && method !== 'HEAD') {
@@ -1359,15 +1341,13 @@ function serveStatic(req, res, pathname, method) {
   fs.createReadStream(filePath).pipe(res);
 }
 
-// --- server -------------------------------------------------------------------
 
 const server = http.createServer(async (req, res) => {
-  // Basic hardening headers on every response.
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Referrer-Policy', 'no-referrer');
 
-  // Reject requests whose Host header isn't a local name (defends against DNS rebinding).
+  // dns rebinding guard
   
   let pathname;
   try {
@@ -1381,8 +1361,7 @@ const server = http.createServer(async (req, res) => {
 
   if (pathname.startsWith('/api/')) {
     try {
-      // No CORS headers are sent. Requiring a JSON content type on writes also forces browsers
-      // to run a CORS preflight for cross-site requests, which then fail.
+      // no CORS headers; requiring json content-type makes cross-site writes fail the preflight
       if (method !== 'GET' && method !== 'DELETE') {
         const type = String(req.headers['content-type'] || '').toLowerCase();
         if (!type.startsWith('application/json')) throw new HttpError(415, 'Content-Type must be application/json');
